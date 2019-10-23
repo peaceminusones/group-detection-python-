@@ -14,6 +14,7 @@
 
 import numpy as np
 import pandas as pd
+import sys
 
 def dtw(traj1, traj2):
     # traj1 & traj2：表示当前couple的两个轨迹，计算两条轨迹之间的dtw
@@ -39,14 +40,47 @@ def dtw(traj1, traj2):
     d = d**0.5
     D = np.zeros((d.shape[0],d.shape[1]))
     D[0,0] = d[0,0]
-
     for i in range(1,len_traj1):
         for j in range(len_traj2):
-            D1 = 
+            D1 = D[i-1, j]
+            if j > 1:
+                D2 = D[i-1, j-1]
+            else:
+                D2 = float('inf')
+            if j > 2:
+                D3 = D[i-1, j-2]
+            else:
+                D3 = float('inf')
+            
+            D[i, j] = d[i,j] + min([D1, D2, D3])
 
+    dist= D[len_traj1-1, len_traj2-1]
+    
+    """
+        reconstruct the path, so that we can gain information about the 
+        minimum number of steps needed to minimize the distance, and thus 
+        have a normalization coefficient
+    """
+    n = len_traj1 - 1
+    m = len_traj2 - 1
     k = 1
-
+    while((n+m)!=0):
+        if n - 1 == -1:
+            m = m - 1
+        elif m - 1 == -1:
+            n = n - 1
+        else:
+            min_index = np.argmin([D[n-1, m], D[n, m-1], D[n-1, m-1]])
+            if min_index == 0:
+                n = n - 1
+            elif min_index == 1:
+                m = m - 1
+            else:
+                n = n - 1
+                m = m - 1
+        k = k + 1
+    
     return dist, k
 
 def normalization(x):
-    return (x - np.mean(x))/np.std(x)
+    return (x - np.mean(x))/np.std(x, ddof=1)

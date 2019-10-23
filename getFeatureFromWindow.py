@@ -124,7 +124,9 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
             4) compute HEAT MAPS: paths convergence |  feature_pc
         """
         if model_par.features[3] == 1:
-            [allHeatMaps[i], feature_pc[i]] = heatmap(traj1.iloc[:, 0:3].values, traj2.iloc[:, 0:3].values, video_par)
+            traj_1 = traj1.iloc[:, 0:3].values
+            traj_2 = traj2.iloc[:, 0:3].values
+            allHeatMaps[i], feature_pc[i] = heatmap(traj_1, traj_2, video_par)
             if model_par.features[3] != 1:
                 feature_pc[i] = 0
     

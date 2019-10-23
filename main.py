@@ -58,7 +58,7 @@ if __name__ == "__main__":
             # window_size = 10s, 需要把10s内所有帧的数组提出来，所以需要得到第10s最后一帧的索引
             while (index_end <= myF.shape[0]) and (myF.iloc[index_end, 0] <= (myF.iloc[index_start, 0] + model_par.window_size * video_par['frame_rate'])):
                 index_end = index_end + 1
-            print("index start --> end: ",index_start, index_end)
+            print("index start: ", index_start," ---> index end: ", index_end)
             # for this window, compute features
             allinformation = getFeatureFromWindow(myF, index_start, index_end, video_par, model_par)
             X[i] = {'trackid': allinformation[0], 'F': allinformation[1].tolist(), 'couples': allinformation[2].tolist(), 'myfeatures': allinformation[3].tolist(), 'detectedGroups': allinformation[4]}
