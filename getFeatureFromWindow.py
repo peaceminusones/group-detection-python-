@@ -35,17 +35,22 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
     # print(track_id)
     # print(myF)
     """
-        PERSONAL FEATURES
+        PERSONAL FEATURES -----------------------------------------------------------------------------
         (i.e. time, position and velocity)
     """
-    # path[i] 表示行人i的轨迹信息，是dict类型
+    """
+        path[i] 表示行人i的轨迹信息，是dict类型
+        其中数据类型：
+                有速度时：{int_path_id: dataframe_path(frameid,position_X,position_Y,v_X,v_Y)}
+                无速度时：{int_path_id: dataframe_path(frameid,position_X,position_Y)}
+    """
     path = dict()
     # 从10s的第一帧到最后一帧，把每个人的轨迹提取出来，其中数据类型{int_path_id: dataframe_path}
     for t in track_id:
         choosebytrackid = myF[myF[1] == t]
         path[t] = choosebytrackid.iloc[:,[0,2,4]]
 
-    # 如果include_derivatives=true，则需要提取速度特征
+    # 如果include_derivatives=true，则提取速度特征
     if model_par.include_derivatives:
         for t in track_id:
             trajectory = path[t].values
@@ -66,19 +71,19 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
     
     # print(path)
     """
-        PAIR-WISE FEATURES：
+        PAIR-WISE FEATURES：-------------------------------------------------------------------------------------
 
         physical distance |  feature_pd  |  prox
-        motion causality  |  feature_mc  |  granger causality
         trajectory shape  |  feature_ts  |  dtw
+        motion causality  |  feature_mc  |  granger causality
         paths convergence |  feature_pc  |  heatmap
     """
     # 通过track_id先将两两行人形成初始化的组，对于数据集student003大小为：（1128，2）
     couples = group(track_id)
     
     feature_pd = np.zeros((couples.shape[0], 1))
-    feature_mc = np.zeros((couples.shape[0], 1))
     feature_ts = np.zeros((couples.shape[0], 1))
+    feature_mc = np.zeros((couples.shape[0], 1))
     feature_pc = np.zeros((couples.shape[0], 1))
 
     allHeatMaps = dict()
@@ -89,7 +94,6 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
         # 提取出第i行的couple的两个轨迹，数据类型都是dataframe
         traj1 = path[couples[i,0]]
         traj2 = path[couples[i,1]]
-        
         """
             1) compute proxemics: physical distance | feature_pd 
         """
@@ -98,23 +102,24 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
             traj2_frameid = path[couples[i,1]].iloc[:,0].values
 
             feature_pd[i] = prox(traj1_frameid, traj2_frameid, traj1, traj2)
-            
         """
-            2) compute GRANGER CAUSALITY: motion causality  |  feature_mc
+            2) compute MD-DTW: trajectory shape  |  feature_ts
         """
         if model_par.features[1] == 1:
+            traj_1 = traj1.values
+            traj_2 = traj2.values
+            dist, k= dtw(traj_1, traj_2)
+            # 由于距离很大程度上取决于被比较的点的数量，所以它必须被标准化
+            feature_ts[i] = dist/k
+        """
+            3) compute GRANGER CAUSALITY: motion causality  |  feature_mc
+        """
+        if model_par.features[2] == 1:
             granger_order = 4
             F1 = granger(traj1, traj2, granger_order)
             F2 = granger(traj2, traj1, granger_order)
 
             feature_mc[i] = max(F1, F2)
-        """
-            3) compute MD-DTW: trajectory shape  |  feature_ts
-        """
-        if model_par.features[2] == 1:
-            [dist, k]= dtw(traj1, traj2)
-            # 由于距离很大程度上取决于被比较的点的数量，所以它必须被标准化
-            feature_ts[i] = dist/k
         """
             4) compute HEAT MAPS: paths convergence |  feature_pc
         """
@@ -123,13 +128,13 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
             if model_par.features[3] != 1:
                 feature_pc[i] = 0
     
-    # 把四个特征列向量组合成一个n*4的二维矩阵[feature_pd, feature_mc, feature_ts, feature_pc]
-    myfeatures = np.concatenate((feature_pd, feature_mc),axis = 1)
-    myfeatures = np.concatenate((myfeatures, feature_ts),axis = 1)
+    # 把四个特征列向量组合成一个n*4的二维矩阵[feature_pd, feature_ts, feature_mc, feature_pc]
+    myfeatures = np.concatenate((feature_pd, feature_ts),axis = 1)
+    myfeatures = np.concatenate((myfeatures, feature_mc),axis = 1)
     myfeatures = np.concatenate((myfeatures, feature_pc),axis = 1)
     
     """
-        HEAT MAPS COARSE GROUP DETECTION
+        HEAT MAPS COARSE GROUP DETECTION -------------------------------------------------------------------------------
     """
     detectedGroup[0] = list(couples)
 

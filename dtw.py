@@ -1,15 +1,52 @@
+"""
+    trajectory shape  |  feature_ts  |  dtw
+
+    Dynamic Time Warping Algorithm:
+    Dist is unnormalized distance between traj1 and traj2
+    D: the accumulated distance matrix
+    k: the normalizing factor
+    w: the optimal path
+    traj1: the vector you are testing against
+    traj2: the vector you are testing
+
+    The orinal code by: T. Felty (2005). Dynamic Time Warping [Computer program].
+"""
 
 import numpy as np
 import pandas as pd
 
 def dtw(traj1, traj2):
+    # traj1 & traj2：表示当前couple的两个轨迹，计算两条轨迹之间的dtw
+    # eg: traj1(n×m)：n表示轨迹1的位置点的个数，m表示轨迹1的特征个数（5表示包括了速度，3表示不包括速度）
     dist = 0
-    k = 1
-    len_traj1 = len(traj1)
-    len_traj2 = len(traj2)
-    d = 0
-    for i in range(2):
-        traj1_position = traj1.iloc[:, i + 1].values
-        traj2_position = traj2.iloc[:, i + 1].values
+    
+    len_traj1 = traj1.shape[0]
+    len_traj2 = traj2.shape[0]
+    n_feature = traj1.shape[1]  # traj1的position(x,y)，可能还有速度
 
-    return [dist, k]
+    d = 0
+    for i in range(n_feature - 1):
+        traj1_fi = traj1[:, i + 1] # traj1除了frameid，一列一列提取出来
+        traj2_fi = traj2[:, i + 1] # 同上
+        # 标准化
+        traj1_fi = normalization(traj1_fi)
+        traj2_fi = normalization(traj2_fi)
+
+        # print(np.tile(traj1_fi.reshape(-1,1), (1,len_traj2)))
+        # print(np.tile(traj2_fi, (len_traj1, 1)))
+        d = d + (np.tile(traj1_fi.reshape(-1,1), (1,len_traj2)) - np.tile(traj2_fi, (len_traj1, 1)))**2
+    
+    d = d**0.5
+    D = np.zeros((d.shape[0],d.shape[1]))
+    D[0,0] = d[0,0]
+
+    for i in range(1,len_traj1):
+        for j in range(len_traj2):
+            D1 = 
+
+    k = 1
+
+    return dist, k
+
+def normalization(x):
+    return (x - np.mean(x))/np.std(x)
