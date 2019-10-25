@@ -127,6 +127,8 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
             traj_1 = traj1.iloc[:, 0:3].values
             traj_2 = traj2.iloc[:, 0:3].values
             allHeatMaps[i], feature_pc[i] = heatmap(traj_1, traj_2, video_par)
+            print(allHeatMaps[i])
+            print(feature_pc[i])
             if model_par.features[3] != 1:
                 feature_pc[i] = 0
     

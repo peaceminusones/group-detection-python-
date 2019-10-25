@@ -68,4 +68,50 @@ def heatmap(traj1, traj2, video_par):
     # print(gridStart_2)
     # print(gridEnd_2)
 
+    for i in range(heat_1.shape[0]):
+        for j in range(heat_1.shape[1]):
+            if not math.isnan(gridStart_1[i,j]):
+                Ebar = C/k_t * (1 - math.exp(-k_t * (gridEnd_1[i,j] - gridStart_1[i,j] + 1)/video_par['downsampling']))
+                heat_1[i,j] = Ebar * math.exp(-k_t *(frame_end - gridEnd_1[i,j] + 1)/video_par['downsampling'])
+            
+            if not math.isnan(gridStart_2[i,j]):
+                Ebar = C/k_t * (1 - math.exp(-k_t * (gridEnd_2[i,j] - gridStart_2[i,j] + 1)/video_par['downsampling']))
+                heat_2[i,j] = Ebar * math.exp(-k_t *(frame_end - gridEnd_2[i,j] + 1)/video_par['downsampling'])
+    
+    # interesting patches
+    z_1 = copy.deepcopy(heat_1)
+    z_1[z_1!=0] = 1
+    N_1 = sum(sum(z_1))
+    z_2 = copy.deepcopy(heat_2)
+    z_2[z_2!=0] = 1
+    N_2 = sum(sum(z_2))
+
+    for i in range(heat_1.shape[0]):
+        for j in range(heat_1.shape[1]):
+            # now compute the diffusion for traj1
+            for m in range(z_1.shape[0]):
+                for n in range(z_1.shape[1]):
+                    dist = math.sqrt(math.pow(i-m,2) + math.pow(j-n,2))
+                    H_1[i,j] = H_1[i,j] + heat_1[m,n] * math.exp(-k_p*dist)
+
+            # compute the diffusion for traj2
+            for m in range(z_2.shape[0]):
+                for n in range(z_2.shape[1]):
+                    dist = math.sqrt(math.pow(i-m,2) + math.pow(j-n,2))
+                    H_2[i,j] = H_2[i,j] + heat_2[m,n] * math.exp(-k_p*dist)
+
+    H_1 = H_1/N_1
+    sum_1 = sum(sum(H_1))
+
+    H_2 = H_2/N_2
+    sum_2 = sum(sum(H_2))
+
+    H = H_1 * H_2
+    sum_H = sum(sum(H))
+
+    if min(sum_1, sum_2) == 0:
+        S = 0
+    else:
+        S = sum_H / min(sum_1, sum_2)
+
     return H, S
