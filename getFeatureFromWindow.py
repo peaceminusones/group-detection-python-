@@ -1,7 +1,6 @@
 """
  extract trajectory feature:
 """
-
 import numpy as np
 import pandas as pd
 from itertools import combinations 
@@ -10,7 +9,9 @@ from granger import granger
 from dtw import dtw
 from heatmap import heatmap
 from detectGroups import detectGroups
+import numba as nb
 
+@nb.jit
 def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
     # 需要把10s内所有帧的数组提出来
     myF = myF.iloc[index_start:index_end, :]
@@ -100,8 +101,9 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
         if model_par.features[0] == 1:
             traj1_frameid = path[couples[i,0]].iloc[:,0].values
             traj2_frameid = path[couples[i,1]].iloc[:,0].values
-
-            feature_pd[i] = prox(traj1_frameid, traj2_frameid, traj1, traj2)
+            traj_1 = traj1.values
+            traj_2 = traj2.values
+            feature_pd[i] = prox(traj1_frameid, traj2_frameid, traj_1, traj_2)
         """
             2) compute MD-DTW: trajectory shape  |  feature_ts
         """
@@ -115,38 +117,41 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
             3) compute GRANGER CAUSALITY: motion causality  |  feature_mc
         """
         if model_par.features[2] == 1:
-            granger_order = 4
-            F1 = granger(traj1, traj2, granger_order)
-            F2 = granger(traj2, traj1, granger_order)
-
+            traj_1 = traj1.values
+            traj_2 = traj2.values
+            F1 = granger(traj_1, traj_2)
+            F2 = granger(traj_2, traj_1)
             feature_mc[i] = max(F1, F2)
         """
             4) compute HEAT MAPS: paths convergence |  feature_pc
         """
         if model_par.features[3] == 1:
-            traj_1 = traj1.iloc[:, 0:3].values
-            traj_2 = traj2.iloc[:, 0:3].values
-            allHeatMaps[i], feature_pc[i] = heatmap(traj_1, traj_2, video_par)
-            print(allHeatMaps[i])
-            print(feature_pc[i])
+            traj_1 = traj1.values
+            traj_2 = traj2.values
+            allHeatMaps[i], feature_pc[i] = heatmap(traj_1[:, 0:3], traj_2[:, 0:3], video_par)
             if model_par.features[3] != 1:
                 feature_pc[i] = 0
+        print(feature_pd[i])
+        print(feature_ts[i])
+        print(feature_mc[i])
+        print(feature_pc[i])
     
     # 把四个特征列向量组合成一个n*4的二维矩阵[feature_pd, feature_ts, feature_mc, feature_pc]
     myfeatures = np.concatenate((feature_pd, feature_ts),axis = 1)
     myfeatures = np.concatenate((myfeatures, feature_mc),axis = 1)
     myfeatures = np.concatenate((myfeatures, feature_pc),axis = 1)
     
+    
     """
         HEAT MAPS COARSE GROUP DETECTION -------------------------------------------------------------------------------
     """
-    detectedGroup[0] = list(couples)
+    detectedGroup[0] = couples.tolist()
 
     if model_par.useHMGroupDetection:
         detectedGroup = detectGroups(couples, allHeatMaps)
     
     return [track_id, F, couples, myfeatures, detectedGroup]
 
-
+@nb.jit
 def group(track_id):
     return np.array(list(combinations(track_id, 2)))

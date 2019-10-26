@@ -15,7 +15,9 @@
 import numpy as np
 import pandas as pd
 import sys
+import numba as nb
 
+@nb.jit
 def dtw(traj1, traj2):
     # traj1 & traj2：表示当前couple的两个轨迹，计算两条轨迹之间的dtw
     # eg: traj1(n×m)：n表示轨迹1的位置点的个数，m表示轨迹1的特征个数（5表示包括了速度，3表示不包括速度）
@@ -82,5 +84,6 @@ def dtw(traj1, traj2):
     
     return dist, k
 
+@nb.jit
 def normalization(x):
     return (x - np.mean(x))/np.std(x, ddof=1)

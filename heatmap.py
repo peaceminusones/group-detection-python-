@@ -5,7 +5,9 @@
 import numpy as np 
 import math
 import copy
+import numba as nb
 
+@nb.jit
 def heatmap(traj1, traj2, video_par):
 
     # units of measurements
@@ -81,10 +83,10 @@ def heatmap(traj1, traj2, video_par):
     # interesting patches
     z_1 = copy.deepcopy(heat_1)
     z_1[z_1!=0] = 1
-    N_1 = sum(sum(z_1))
+    N_1 = np.sum(np.sum(z_1))
     z_2 = copy.deepcopy(heat_2)
     z_2[z_2!=0] = 1
-    N_2 = sum(sum(z_2))
+    N_2 = np.sum(np.sum(z_2))
 
     for i in range(heat_1.shape[0]):
         for j in range(heat_1.shape[1]):
@@ -101,13 +103,13 @@ def heatmap(traj1, traj2, video_par):
                     H_2[i,j] = H_2[i,j] + heat_2[m,n] * math.exp(-k_p*dist)
 
     H_1 = H_1/N_1
-    sum_1 = sum(sum(H_1))
+    sum_1 = np.sum(np.sum(H_1))
 
     H_2 = H_2/N_2
-    sum_2 = sum(sum(H_2))
+    sum_2 = np.sum(np.sum(H_2))
 
     H = H_1 * H_2
-    sum_H = sum(sum(H))
+    sum_H = np.sum(np.sum(H))
 
     if min(sum_1, sum_2) == 0:
         S = 0

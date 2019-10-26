@@ -61,6 +61,7 @@ if __name__ == "__main__":
             print("index start: ", index_start," ---> index end: ", index_end)
             # for this window, compute features
             allinformation = getFeatureFromWindow(myF, index_start, index_end, video_par, model_par)
+            print(allinformation)
             X[i] = {'trackid': allinformation[0], 'F': allinformation[1].tolist(), 'couples': allinformation[2].tolist(), 'myfeatures': allinformation[3].tolist(), 'detectedGroups': allinformation[4]}
 
             # for this window, retrieve the cluster (so we can use them in the training)

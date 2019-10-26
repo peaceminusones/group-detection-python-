@@ -84,15 +84,24 @@
 #     # print(H_temp_and_obj_Y_temp)
 
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-ax = []                    # 定义一个 x 轴的空列表用来接收动态的数据
-ay = []                    # 定义一个 y 轴的空列表用来接收动态的数据
-plt.ion()                  # 开启一个画图的窗口
-for i in range(100):       # 遍历0-99的值
-	ax.append(i)           # 添加 i 到 x 轴的数据中
-	ay.append(i**2)        # 添加 i 的平方到 y 轴的数据中
-	plt.clf()              # 清除之前画的图
-	plt.plot(ax,ay)        # 画出当前 ax 列表和 ay 列表中的值的图形
-	plt.pause(0.1)         # 暂停一秒
-	plt.ioff()             # 关闭画图的窗口
+# ax = []                    # 定义一个 x 轴的空列表用来接收动态的数据
+# ay = []                    # 定义一个 y 轴的空列表用来接收动态的数据
+# plt.ion()                  # 开启一个画图的窗口
+# for i in range(100):       # 遍历0-99的值
+# 	ax.append(i)           # 添加 i 到 x 轴的数据中
+# 	ay.append(i**2)        # 添加 i 的平方到 y 轴的数据中
+# 	plt.clf()              # 清除之前画的图
+# 	plt.plot(ax,ay)        # 画出当前 ax 列表和 ay 列表中的值的图形
+# 	plt.pause(0.1)         # 暂停一秒
+# 	plt.ioff()             # 关闭画图的窗口
+
+import numpy as np
+from scipy.linalg import solve
+a = np.array([[1, 1, 7], [2, 3, 5], [4, 2, 6]])
+b = np.array([2, 3, 4])
+x1 = solve(a, b)
+# x2 = np.mat(b) * np.mat(a).I
+x2 = b/a
+print(x1,x2)
