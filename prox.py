@@ -6,21 +6,6 @@ import math
 import numba as nb
 
 @nb.jit
-def square(list_x):
-    s = [[list_x[i][j] ** 2 for j in range(len(list_x[i]))] for i in range(len(list_x))]
-    return np.array(s)
-
-# @nb.jit
-def pow_minus(list_x, n):
-    s = np.array(list(map(lambda x: -math.pow(x, n), list_x)))
-    return s
-
-# @nb.jit
-def exp(list_x):
-    s = np.array(list(map(lambda x: math.exp(x), list_x)))
-    return s
-
-@nb.jit
 def prox(traj1_f, traj2_f, traj1, traj2):
     interset_f = sorted(list(set(traj1_f) & set(traj2_f)))
     if len(interset_f) == 0:
@@ -43,3 +28,14 @@ def prox(traj1_f, traj2_f, traj1, traj2):
         similar = ed / max(len(traj1_f), len(traj2_f))
     return similar
 
+def square(list_x):
+    s = [[list_x[i][j] ** 2 for j in range(len(list_x[i]))] for i in range(len(list_x))]
+    return np.array(s)
+
+def pow_minus(list_x, n):
+    s = np.array(list(map(lambda x: -math.pow(x, n), list_x)))
+    return s
+
+def exp(list_x):
+    s = np.array(list(map(lambda x: math.exp(x), list_x)))
+    return s

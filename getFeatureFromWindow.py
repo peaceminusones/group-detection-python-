@@ -31,8 +31,8 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
 
     # 重新索引，并更新track_id
     myF = myF.reset_index(drop=True)
-    F = myF.values
-    track_id = sorted(set(F[:, 1].astype(int)))
+    # F = myF.values
+    track_id = sorted(set(myF.values[:, 1].astype(int)))
     # print(track_id)
     # print(myF)
     """
@@ -95,21 +95,23 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
         # 提取出第i行的couple的两个轨迹，数据类型都是dataframe
         traj1 = path[couples[i,0]]
         traj2 = path[couples[i,1]]
+        traj_1 = traj1.values
+        traj_2 = traj2.values
         """
             1) compute proxemics: physical distance | feature_pd 
         """
         if model_par.features[0] == 1:
-            traj1_frameid = path[couples[i,0]].iloc[:,0].values
-            traj2_frameid = path[couples[i,1]].iloc[:,0].values
-            traj_1 = traj1.values
-            traj_2 = traj2.values
+            traj1_frameid = traj1.iloc[:,0].values
+            traj2_frameid = traj2.iloc[:,0].values
+            # traj_1 = traj1.values
+            # traj_2 = traj2.values
             feature_pd[i] = prox(traj1_frameid, traj2_frameid, traj_1, traj_2)
         """
             2) compute MD-DTW: trajectory shape  |  feature_ts
         """
         if model_par.features[1] == 1:
-            traj_1 = traj1.values
-            traj_2 = traj2.values
+            # traj_1 = traj1.values
+            # traj_2 = traj2.values
             dist, k= dtw(traj_1, traj_2)
             # 由于距离很大程度上取决于被比较的点的数量，所以它必须被标准化
             feature_ts[i] = dist/k
@@ -117,8 +119,10 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
             3) compute GRANGER CAUSALITY: motion causality  |  feature_mc
         """
         if model_par.features[2] == 1:
-            traj_1 = traj1.values
-            traj_2 = traj2.values
+            # traj_1 = traj1.values
+            # traj_2 = traj2.values
+            # F1 = granger(traj_1, traj_2)
+            # F2 = granger(traj_2, traj_1)
             F1 = granger(traj_1, traj_2)
             F2 = granger(traj_2, traj_1)
             feature_mc[i] = max(F1, F2)
@@ -126,8 +130,8 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
             4) compute HEAT MAPS: paths convergence |  feature_pc
         """
         if model_par.features[3] == 1:
-            traj_1 = traj1.values
-            traj_2 = traj2.values
+            # traj_1 = traj1.values
+            # traj_2 = traj2.values
             allHeatMaps[i], feature_pc[i] = heatmap(traj_1[:, 0:3], traj_2[:, 0:3], video_par)
             if model_par.features[3] != 1:
                 feature_pc[i] = 0
@@ -140,7 +144,6 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
     myfeatures = np.concatenate((feature_pd, feature_ts),axis = 1)
     myfeatures = np.concatenate((myfeatures, feature_mc),axis = 1)
     myfeatures = np.concatenate((myfeatures, feature_pc),axis = 1)
-    
     
     """
         HEAT MAPS COARSE GROUP DETECTION -------------------------------------------------------------------------------
