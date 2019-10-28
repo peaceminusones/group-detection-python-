@@ -36,8 +36,8 @@ def lossGM(Y_train, ybar):
     for i in range(len(Y_train)):
         for j in range(len(Y_train[i])):
             # find the index of the group_pedestrian_id and update its input in UF_ytrain
-            print(Y_train[i][j])
-            print(group_pedestrian_id)
+            # print(Y_train[i][j])
+            # print(group_pedestrian_id)
             if Y_train[i][j] in group_pedestrian_id:
                 res = group_pedestrian_id.index(Y_train[i][j])
                 UF_ytrain[res] = i + 1 # 同一组的标号相同

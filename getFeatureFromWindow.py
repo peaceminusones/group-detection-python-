@@ -123,8 +123,8 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
             # traj_2 = traj2.values
             # F1 = granger(traj_1, traj_2)
             # F2 = granger(traj_2, traj_1)
-            F1 = granger(traj_1, traj_2)
-            F2 = granger(traj_2, traj_1)
+            F1 = granger(traj1, traj2)
+            F2 = granger(traj2, traj1)
             feature_mc[i] = max(F1, F2)
         """
             4) compute HEAT MAPS: paths convergence |  feature_pc
@@ -135,10 +135,10 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
             allHeatMaps[i], feature_pc[i] = heatmap(traj_1[:, 0:3], traj_2[:, 0:3], video_par)
             if model_par.features[3] != 1:
                 feature_pc[i] = 0
-        print(feature_pd[i])
-        print(feature_ts[i])
-        print(feature_mc[i])
-        print(feature_pc[i])
+        # print(feature_pd[i])
+        # print(feature_ts[i])
+        # print(feature_mc[i])
+        # print(feature_pc[i])
     
     # 把四个特征列向量组合成一个n*4的二维矩阵[feature_pd, feature_ts, feature_mc, feature_pc]
     myfeatures = np.concatenate((feature_pd, feature_ts),axis = 1)

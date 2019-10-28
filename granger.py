@@ -7,37 +7,37 @@ import math
 import scipy.signal as signal
 import numba as nb
 
-@nb.jit(nopython=True)
+# @nb.njit(nopython=True)
 def granger(traj1, traj2):
     g = 4
     # 两个轨迹的frameid，并得到同时出现的frameid，即traj1_f和traj2_f的交集
-    traj1_f = traj1[:, 0]
-    traj2_f = traj2[:, 0]
-    # traj1_f = traj1.iloc[:, 0].values
-    # traj2_f = traj2.iloc[:, 0].values
+    # traj1_f = traj1[:, 0]
+    # traj2_f = traj2[:, 0]
+    traj1_f = traj1.iloc[:, 0].values
+    traj2_f = traj2.iloc[:, 0].values
     interset_f = sorted(list(set(traj1_f) & set(traj2_f)))
     if len(interset_f) == 0:
         F = 0
     else:
         # 根据两个轨迹frameid的交集，分别筛出两个轨迹同时出现的部分
-        inter_t1 = []
-        inter_t2 = []
-        for i in range(len(interset_f)):
-            if traj1[i,0] == interset_f[i] or traj2[i,0] == interset_f[i]:
-                inter_t1.append(list(traj1[i, 1:]))
-                inter_t2.append(list(traj2[i, 1:]))
-        inter_traj1 = np.array(inter_t1)
-        inter_traj2 = np.array(inter_t2)
-        
-        # inter_traj1 = []
-        # inter_traj2 = []
+        # inter_t1 = []
+        # inter_t2 = []
         # for i in range(len(interset_f)):
-        #     t = traj1[traj1[0] == interset_f[i]]
-        #     r = traj2[traj2[0] == interset_f[i]]
-        #     inter_traj1.append(list(t.iloc[:, 1:].values[0]))
-        #     inter_traj2.append(list(r.iloc[:, 1:].values[0]))
-        # inter_traj1 = np.array(inter_traj1)
-        # inter_traj2 = np.array(inter_traj2)
+        #     if traj1[i,0] == interset_f[i] or traj2[i,0] == interset_f[i]:
+        #         inter_t1.append(list(traj1[i, 1:]))
+        #         inter_t2.append(list(traj2[i, 1:]))
+        # inter_traj1 = np.array(inter_t1)
+        # inter_traj2 = np.array(inter_t2)
+        
+        inter_traj1 = []
+        inter_traj2 = []
+        for i in range(len(interset_f)):
+            t = traj1[traj1[0] == interset_f[i]]
+            r = traj2[traj2[0] == interset_f[i]]
+            inter_traj1.append(list(t.iloc[:, 1:].values[0]))
+            inter_traj2.append(list(r.iloc[:, 1:].values[0]))
+        inter_traj1 = np.array(inter_traj1)
+        inter_traj2 = np.array(inter_traj2)
 
         # number of features
         fn = inter_traj1.shape[1]
@@ -45,10 +45,10 @@ def granger(traj1, traj2):
         length = inter_traj1.shape[0]
 
         # 均值
-        mean_traj1 = inter_traj1.mean(axis=0)
-        mean_traj2 = inter_traj2.mean(axis=0)
-        # mean_traj1 = list(npmean(inter_traj1))
-        # mean_traj2 = list(npmean(inter_traj2))
+        # mean_traj1 = inter_traj1.mean(axis=0)
+        # mean_traj2 = inter_traj2.mean(axis=0)
+        mean_traj1 = list(npmean(inter_traj1))
+        mean_traj2 = list(npmean(inter_traj2))
         
         inter_traj1 = inter_traj1 - np.array([mean_traj1 for _ in range(length)])
         inter_traj2 = inter_traj2 - np.array([mean_traj2 for _ in range(length)])
@@ -126,10 +126,10 @@ def granger(traj1, traj2):
 
     return F
 
-# @nb.jit
-# def npmean(t):
-#     t_mean = np.zeros(t.shape[1])
-#     for i in range(t.shape[1]):
-#         t_sumi = np.sum(t[:,i])
-#         t_mean[i] = t_sumi/t.shape[0]
-#     return t_mean
+@nb.jit
+def npmean(t):
+    t_mean = np.zeros(t.shape[1])
+    for i in range(t.shape[1]):
+        t_sumi = np.sum(t[:,i])
+        t_mean[i] = t_sumi/t.shape[0]
+    return t_mean

@@ -35,7 +35,7 @@ def trainBCFW(X_train, Y_train):
     # initial parameter
     parameter = dict()
     parameter['C'] = 10             # regularization parameter
-    parameter['maxIter'] = 10      # maximum number of iterations
+    parameter['maxIter'] = 400      # maximum number of iterations
 
     detectedGroups = [X_train[i]['detectedGroups'] for i in range(len(X_train))]
     F = [X_train[i]['F'] for i in range(len(X_train))]
@@ -67,11 +67,13 @@ def trainBCFW(X_train, Y_train):
         # find the most violated
         model_w = w
         y_star = cf.constraintFind(model_w, parameter, detectedGroups[iblock], X_train[iblock], Y_train[iblock])
+        print("y_star: ")
         print(y_star)
         
         # compute the loss at the new point
         # l_s = ((1/lambda_c)/n)*loss.lossGM(Y_train[iblock], y_star)
-        l_s = (1/n)*loss.lossGM(Y_train[iblock], y_star)
+        delta,_,_ = loss.lossGM(Y_train[iblock], y_star)
+        l_s = (1/n)*delta
         # print(l_s)
 
         # find the new best value of the variable
@@ -82,6 +84,7 @@ def trainBCFW(X_train, Y_train):
         step_size = ((lambda_c * np.dot(w_i[:,iblock]-w_s, w) + l_s - l_i[iblock] ) / lambda_c / np.dot(w_i[:,iblock]-w_s, w_i[:,iblock]-w_s))[0]
         step_size = [step_size, 0][0 > step_size]
         step_size = [step_size, 1][step_size > 1]
+        print("step_size: ")
         print(step_size)
 
         # evaluate w_i and l_i

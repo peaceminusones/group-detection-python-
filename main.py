@@ -12,7 +12,7 @@ from test_struct_svm import test_struct_svm
 from showCluster import showCluster
 
 dataDirectory = "mydata/student003"
-feature_extraction = True
+feature_extraction = False
 
 class model_par:
     display = True
@@ -26,7 +26,7 @@ class model_par:
     useHMGroupDetection = False
 
 class model:
-    trainMe = False
+    trainMe = True
     preTrain_w = []
 
 
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     index_start = 0
     index_end = 0
     # test_starting_index = 0
-    if feature_extraction: #or not(os.path.exists(dataDirectory + "/featureX.json") and os.path.exists(dataDirectory + "/featureY.json")):
+    if feature_extraction or not(os.path.exists(dataDirectory + "/featureX.json") and os.path.exists(dataDirectory + "/featureY.json")):
         X = dict()   # input data
         Y = dict()   # ground truth info
 
@@ -89,7 +89,7 @@ if __name__ == "__main__":
             Y = json.load(f)
         print("done!\n")
 
-        print(X[str(1)]['myfeatures'])
+        print(X[str(0)]['myfeatures'])
         print(Y)
         """
         现在已经有了特征 --------------------------------------------------------------
