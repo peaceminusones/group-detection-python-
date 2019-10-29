@@ -38,7 +38,7 @@ def trainBCFW(X_train, Y_train):
     parameter['maxIter'] = 400      # maximum number of iterations
 
     detectedGroups = [X_train[i]['detectedGroups'] for i in range(len(X_train))]
-    F = [X_train[i]['F'] for i in range(len(X_train))]
+    # F = [X_train[i]['F'] for i in range(len(X_train))]
 
     n = len(X_train)
     n_it = parameter['maxIter']
@@ -82,6 +82,8 @@ def trainBCFW(X_train, Y_train):
 
         # compute the step size
         step_size = ((lambda_c * np.dot(w_i[:,iblock]-w_s, w) + l_s - l_i[iblock] ) / lambda_c / np.dot(w_i[:,iblock]-w_s, w_i[:,iblock]-w_s))[0]
+        if math.isnan(step_size):
+            continue
         step_size = [step_size, 0][0 > step_size]
         step_size = [step_size, 1][step_size > 1]
         print("step_size: ")

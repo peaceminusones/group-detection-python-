@@ -21,7 +21,8 @@ def parfor(information, j):
     
     n_cluster = len(cluster)
 
-    if not isClusterLegal(cluster[couples[j,0]], cluster[couples[j,1]], X_test[str(i)]['detectedGroups']):
+    # if not isClusterLegal(cluster[couples[j,0]], cluster[couples[j,1]], X_test[str(i)]['detectedGroups']):!!!!!!!!
+    if not isClusterLegal(cluster[couples[j,0]], cluster[couples[j,1]], X_test[i]['detectedGroups']):
         return [0, 0]
 
     cluster_temp = list(np.zeros(n_cluster - 1))
@@ -37,7 +38,8 @@ def parfor(information, j):
             k = k + 1
             cluster_temp[k] = cluster[m]
     
-    psi = fm.featureMap(X_test[str(i)], cluster_temp)
+    # psi = fm.featureMap(X_test[str(i)], cluster_temp)!!!!!!!!!!!!!!!!
+    psi = fm.featureMap(X_test[i], cluster_temp)
     # psi = np.zeros(X_test[str(i)]['myfeatures'].shape[1])
     # for k in range(len(cluster_temp)):
     #     mycouples = group(sorted(cluster_temp[j]))
@@ -67,7 +69,8 @@ def test_struct_svm(X_test, Y_test, w):
         # xi_members = np.array(X_test[str(i)]['trackid'])
         # for j in range(xi_members.shape[0]):
         #     cluster[j] = xi_members[j]
-        xi_members = np.array(X_test[str(i)]['trackid'])
+        # xi_members = np.array(X_test[str(i)]['trackid'])!!!!!!!!!!!!!
+        xi_members = np.array(X_test[i]['trackid'])
         cluster = [[xi_members[j]] for j in range(xi_members.shape[0])]
 
         # get the number of clusters
@@ -78,7 +81,8 @@ def test_struct_svm(X_test, Y_test, w):
         while changed and n_clusters > 1:
             changed = False
             # evaluate our current score
-            psi = fm.featureMap(X_test[str(i)], cluster)
+            # psi = fm.featureMap(X_test[str(i)], cluster)!!!!!!!!!
+            psi = fm.featureMap(X_test[i], cluster)
             # xi_myfeatures = X_test[str(i)]['myfeatures']
             # psi = np.zeros(np.array(xi_myfeatures).shape[1])
             # for j in range(len(cluster)):
@@ -126,7 +130,8 @@ def test_struct_svm(X_test, Y_test, w):
         for j in range(len(cluster)):
             if len(cluster[j]) > 1:
                 cluster[j] = flatten.flatten(cluster[j])
-        delta, p, r  = loss.lossGM(cluster, Y_test[str(i)])
+        # delta, p, r  = loss.lossGM(cluster, Y_test[str(i)])!!!!!!!!!!
+        delta, p, r  = loss.lossGM(cluster, Y_test[i])
         p_abs = p_abs + p
         r_abs = r_abs + r
         error = error + delta
