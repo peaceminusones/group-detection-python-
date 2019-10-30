@@ -51,7 +51,7 @@ def trainBCFW(X_train, Y_train):
     l_i = np.zeros(n)
 
     # 开启一个画图的窗口
-    # plt.ion()                  
+    # plt.ion() 
     # plt.figure(1)
 
     lambda_c = 1 / parameter['C']

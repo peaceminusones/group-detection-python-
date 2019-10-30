@@ -19,14 +19,14 @@ class model_par:
     window_size = 10
     trainingSetSize = 10
     testingSetSize = 20 - trainingSetSize
-    features = [1, 1, 1, 1]  # [PROX, GRNG, MDWT, HMAP]
+    features = [1, 1, 0, 1]  # [PROX, GRNG, MDWT, HMAP]
 
     numberOfFeatures = sum(features)
     include_derivatives = True
     useHMGroupDetection = False
 
 class model:
-    trainMe = False
+    trainMe = True
     preTrain_w = []
 
 
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     """
     initialize, load weight and data -----------------------------------------------------
     """
-    model.preTrain_w = loadPreTrained(model.trainMe, model_par.features, dataDirectory)
+    # model.preTrain_w = loadPreTrained(model.trainMe, model_par.features, dataDirectory)
     # load data
     [myF, clusters, video_par] = loadData("load from file", dataDirectory)
     print("video_par: \n" ,video_par)
@@ -91,6 +91,13 @@ if __name__ == "__main__":
 
         # print(np.array(X[str(0)]['myfeatures']))
         
+        if model_par.features == [1, 1, 0, 1]:
+            for i in range(len(X)):
+                feature_4 = np.array(X[str(i)]['myfeatures'])
+                X[str(i)]['myfeatures'] = feature_4[:,[0,1,3]]
+
+        # print(np.array(X[str(0)]['myfeatures']))
+        
         # print(Y)
         """
         现在已经有了特征 --------------------------------------------------------------
@@ -98,7 +105,8 @@ if __name__ == "__main__":
             output data: Y
         """
         # 特征标准化，找到所有数据四个特征的各自最大值 --------------------------------------
-        mymax = np.zeros((1, 4))
+        n_feature = sum(model_par.features)
+        mymax = np.zeros((1, n_feature))
         for i in range(model_par.trainingSetSize):
             arrayX = np.abs(np.array(X[str(i)]['myfeatures']))
             columnMax = np.amax(arrayX, axis=0)  # 得到每一列的最大值
@@ -108,7 +116,7 @@ if __name__ == "__main__":
         # print(mymax)
         # 判断选择的标准化mymax里是否有0，如果有0，则不能作为标准化，需要重新设定
         if 0 in mymax:
-            mymax = np.zeros((1, 4))
+            mymax = np.zeros((1, n_feature))
             for i in range(model_par.testingSetSize):
                 arrayX = np.abs(np.array(X[str(i)]['myfeatures']))
                 columnMax = np.amax(arrayX, axis=0)  # 得到每一列的最大值
@@ -130,11 +138,11 @@ if __name__ == "__main__":
             for j in range(model_par.numberOfFeatures):
                 value = X[str(i)]['myfeatures'][:, j] - 1
                 X[str(i)]['myfeatures'] = np.insert(X[str(i)]['myfeatures'], model_par.numberOfFeatures + j, values=value, axis=1)
-        # print(list(X[str(0)]['myfeatures'][1]))
+        # print(X[str(0)]['myfeatures'])
         print("data: " + dataDirectory + ", training: " + str(model_par.trainingSetSize) + ", testing: " + str(model_par.testingSetSize))
         """
-        Training ----------------------------------------------------------
-        """
+        # Training ----------------------------------------------------------
+        # """
         X_test = X
         Y_test = Y
         X_train = [X[str(i)] for i in range(model_par.trainingSetSize)]
