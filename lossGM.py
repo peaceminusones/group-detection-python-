@@ -5,12 +5,12 @@
 import numpy as np 
 import itertools
 import flatten
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # from numba.errors import NumbaDeprecationWarning, NumbaPendingDeprecationWarning, NumbaWarning
 # import warnings
 # warnings.simplefilter('ignore', category=NumbaWarning)
-# from numba import jit
-# @jit
 
 def lossGM(Y_train, ybar):
     """
@@ -30,22 +30,33 @@ def lossGM(Y_train, ybar):
     #               UF_ytrain = [1,1,2,2,2,...]
     # UF_ybar同理
     # 最终得到的connected_ytrain是把UF_ytrain重复的和零元素删除；connected_ybar同理
-    UF_ytrain = np.zeros((2*len(group_pedestrian_id)))
-    UF_ybar = np.zeros((2*len(group_pedestrian_id)))
+    UF_ytrain = np.zeros(2*len(group_pedestrian_id))
+    UF_ybar = np.zeros(2*len(group_pedestrian_id))
 
     for i in range(len(Y_train)):
         for j in range(len(Y_train[i])):
             # find the index of the group_pedestrian_id and update its input in UF_ytrain
             # print(Y_train[i][j])
             # print(group_pedestrian_id)
-            if Y_train[i][j] in group_pedestrian_id:
-                res = group_pedestrian_id.index(Y_train[i][j])
-                UF_ytrain[res] = i + 1 # 同一组的标号相同
+            if isinstance(Y_train[i][j],list):
+                if Y_train[i][j][0] in group_pedestrian_id:
+                    res = group_pedestrian_id.index(Y_train[i][j][0])
+                    UF_ytrain[res] = i + 1 # 同一组的标号相同
+            else:
+                if Y_train[i][j] in group_pedestrian_id:
+                    res = group_pedestrian_id.index(Y_train[i][j])
+                    UF_ytrain[res] = i + 1 # 同一组的标号相同
+    
     for i in range(len(ybar)):
         for j in range(len(ybar[i])):
-            if ybar[i][j] in group_pedestrian_id:
-                res = group_pedestrian_id.index(ybar[i][j])
-                UF_ybar[res] = i + 1
+            if isinstance(ybar[i][j],list):
+                if ybar[i][j][0] in group_pedestrian_id:
+                    res = group_pedestrian_id.index(ybar[i][j][0])
+                    UF_ybar[res] = i + 1
+            else:
+                if ybar[i][j] in group_pedestrian_id:
+                    res = group_pedestrian_id.index(ybar[i][j])
+                    UF_ybar[res] = i + 1
     connected_ytrain = np.unique(np.array(UF_ytrain))[1:]
     connected_ybar = np.unique(np.array(UF_ybar))[1:]
     # --------------------------------------------------------------------------------------------------
@@ -102,4 +113,4 @@ def enumerateIndex(target, a):
     for index, nums in enumerate(a):
         if nums == target:
             b.append(index)
-    return(b)
+    return b

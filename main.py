@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import json 
 from loadData import loadData
@@ -10,6 +9,10 @@ from MyEncoder import MyEncoder
 from trainBCFW import trainBCFW
 from test_struct_svm import test_struct_svm
 from showCluster import showCluster
+
+
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 dataDirectory = "mydata/student003"
 feature_extraction = False
@@ -84,20 +87,32 @@ if __name__ == "__main__":
         # 直接从文件中提取特征
         with open(dataDirectory + '/featureX.json', 'r') as f:
             X = json.load(f)
-        print("Extraction from featureY")
-        with open(dataDirectory + '/featureY.json', 'r') as f:
+        print("Extraction from featureY1")
+        with open(dataDirectory + '/featureY1.json', 'r') as f:
             Y = json.load(f)
         print("done!\n")
 
-        # print(np.array(X[str(0)]['myfeatures']))
+        # # ----------------------------------------------------------------------------------------
+        # Y = dict()
+        # for i in range(model_par.trainingSetSize + model_par.testingSetSize):
+        #     while (index_end <= myF.shape[0]) and (myF.iloc[index_end, 0] <= (myF.iloc[index_start, 0] + model_par.window_size * video_par['frame_rate'])):
+        #         index_end = index_end + 1
+
+        #     Y[i] = getClustersFromWindow(X[str(i)]['trackid'], dataDirectory)
+
+        # with open(dataDirectory + '/featureY1.json', 'w') as f:
+        #     json.dump(Y, f, cls=MyEncoder, indent=4, separators=(',',':'))
+        # print("featureY1 -----------------done!\n")
+        # # -----------------------------------------------------------------------------------------
         
+        # print(np.array(X[str(0)]['myfeatures']))
+        # 放弃第三个特征（ganger）
         if model_par.features == [1, 1, 0, 1]:
             for i in range(len(X)):
                 feature_4 = np.array(X[str(i)]['myfeatures'])
                 X[str(i)]['myfeatures'] = feature_4[:,[0,1,3]]
 
         # print(np.array(X[str(0)]['myfeatures']))
-        
         # print(Y)
         """
         现在已经有了特征 --------------------------------------------------------------
@@ -143,8 +158,9 @@ if __name__ == "__main__":
         """
         # Training ----------------------------------------------------------
         # """
-        X_test = X
-        Y_test = Y
+        model_par.testingSetSize = model_par.testingSetSize + model_par.trainingSetSize
+        X_test = [X[str(i)] for i in range(model_par.testingSetSize)]
+        Y_test = [Y[str(i)] for i in range(model_par.testingSetSize)]
         X_train = [X[str(i)] for i in range(model_par.trainingSetSize)]
         Y_train = [Y[str(i)] for i in range(model_par.trainingSetSize)]
         # print(X_test[str(0)]['trackid'])
@@ -153,30 +169,31 @@ if __name__ == "__main__":
         if model.trainMe:
             print("\nTraining the classifier on the training set:\n")
             modelBCFW_weight= trainBCFW(X_train, Y_train)
-            print(modelBCFW_weight)
-        else:
-            # modelBCFW_weight = model.preTrain_w
-            # modelBCFW_weight = np.array([[-0.00482523],[ 0.00467267],[ 0.005967  ],[-0.0016145 ],[-0.0047506 ],[ 0.0028309 ],[ 0.00153657],[-0.00796133]])
-            # modelBCFW_weight = np.array([[-0.0356655111340553],[0.0246113342594141],[0.00524166773229231],[-0.0124222568704902],[-0.0442202270483166],[0.0160566183451527],[-0.00331304818196912],[-0.0209769727847515]])
-            modelBCFW_weight = np.array([[-0.01126997],[ 0.0007279 ],[-0.00283754],[-0.00679829],[-0.00511671],[-0.00115596],[ 0.00240948],[-0.00958839]])
-            # modelBCFW_weight = np.array([[-1.09332335e-02],[ 4.70989304e-03],[ 9.51981444e-05],[-1.11421200e-02],[-1.08864029e-02],[ 3.50915218e-04],[ 4.96561011e-03],[-1.06775165e-02]])
-            print("\nLoad model weight: " + str(modelBCFW_weight.T[0]))
+            print("modelBCFW_weight=\n", modelBCFW_weight)
+        # else:
+        #     # modelBCFW_weight = model.preTrain_w
+        #     # modelBCFW_weight = np.array([[-0.00482523],[ 0.00467267],[ 0.005967  ],[-0.0016145 ],[-0.0047506 ],[ 0.0028309 ],[ 0.00153657],[-0.00796133]])
+        #     # modelBCFW_weight = np.array([[-0.0356655111340553],[0.0246113342594141],[0.00524166773229231],[-0.0124222568704902],[-0.0442202270483166],[0.0160566183451527],[-0.00331304818196912],[-0.0209769727847515]])
+        #     # modelBCFW_weight = np.array([[-0.01126997],[ 0.0007279 ],[-0.00283754],[-0.00679829],[-0.00511671],[-0.00115596],[ 0.00240948],[-0.00958839]])
+        #     modelBCFW_weight = np.array([[-0.05756384],[ 0.0133388 ],[-0.046953  ],[-0.03847554],[ 0.0324271 ],[-0.0278647 ]])
+        #     # modelBCFW_weight = np.array([[-1.09332335e-02],[ 4.70989304e-03],[ 9.51981444e-05],[-1.11421200e-02],[-1.08864029e-02],[ 3.50915218e-04],[ 4.96561011e-03],[-1.06775165e-02]])
+        #     print("\nLoad model weight: " + str(modelBCFW_weight.T[0]))
 
-        """
-        Testing ----------------------------------------------------------
-        """
+        # """
+        # Testing ----------------------------------------------------------
+        # """
 
         # print("\nTesting the classifier on the testing set:\n")
         # model_par.testingSetSize = model_par.testingSetSize + model_par.trainingSetSize
-        # myY_test, absolute_error_test, p_test, r_test, perf = test_struct_svm (X_train, Y_train, modelBCFW_weight)
+        # myY_test, absolute_error_test, p_test, r_test, perf = test_struct_svm (X_test, Y_test, modelBCFW_weight)
         # print(myY_test)
         # print(absolute_error_test)
         # print(p_test)
         # print(r_test)
         # print(perf)
-
         # output_test = np.round(np.array([absolute_error_test, p_test, r_test])/model_par.trainingSetSize*100*100)/100
         # print('Testing error: ',output_test[0], '%% (Precision: ',output_test[1],'%%, Recall: ',output_test[2],'%%)\n')
+        
         # myY_test = {0: [[18, 19, 20], [28, 30, 27, 29, 6, 2], [73, 74], [10, 12, 11, 13], [215, 216], [219, 220, 217], [9, 273], [77, 78], [7, 8], [14, 16], [213, 214], [1], [3], [4], [5], [15], [17], [21], [22], [23], [24], [25], [26], [31], [75], [76], [218], [274], [409]],
         #             1: [[24, 420, 419, 37], [217, 220], [4, 75], [77, 78], [35, 36], [33, 34], [14, 16], [27, 29], [19, 20], [28, 30], [12, 13, 10], [3], [5], [7], [8], [9], [11], [17], [23], [25], [26], [31], [32], [73], [74], [76], [79], [80], [81], [82], [83], [219], [315], [410], [411]],
         #             2: [[233, 410], [38, 39], [80, 81], [300, 301], [217, 220], [84, 85, 82], [40, 302], [303, 304], [28, 30], [11, 12, 13, 41, 10, 45, 44, 76], [27, 29, 19, 20, 232, 87], [4, 75], [33], [34], [35], [36], [37], [42], [43], [74], [77], [78], [79], [83], [86], [219], [221], [222], [223], [305], [315], [316], [317], [411]],

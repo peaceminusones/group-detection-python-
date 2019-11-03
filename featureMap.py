@@ -6,6 +6,8 @@ from itertools import combinations
 import itertools
 import collections
 import flatten
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # from numba.errors import NumbaDeprecationWarning, NumbaPendingDeprecationWarning, NumbaWarning
 # import warnings
@@ -29,8 +31,9 @@ def featureMap(X_train, y):
             for j in range(len(mycouples)):
                 index = X_train['couples'].index([mycouples[j,0], mycouples[j,1]])
                 psi = psi + X_train['myfeatures'][index, :]
-    
-    
+    # print(X_train['trackid'])
+    reshape_x = np.array(X_train['trackid']).reshape(-1,1)
+    psi = psi / pow(reshape_x.shape[1], 2)
     return psi
 
 def group(track_id):

@@ -14,6 +14,8 @@ def getClustersFromWindow(trackid, dataDirectory):
         # 判断每个群组元素是否在当前的窗口出现
         join = list(set(line_intlist) & set(trackid))
         if join:#set(line_intlist) <= set(trackid):
+            if len(join) > 1:
+                join = [[join[i]] for i in range(len(join))]
             clusters.append(join) 
         line = fid.readline()
     fid.close() #关闭文件

@@ -97,11 +97,84 @@
 # 	plt.pause(0.1)         # 暂停一秒
 # 	plt.ioff()             # 关闭画图的窗口
 
+# import numpy as np
+# from scipy.linalg import solve
+# a = np.array([[1, 1, 7], [2, 3, 5], [4, 2, 6]])
+# b = np.array([2, 3, 4])
+# x1 = solve(a, b)
+# # x2 = np.mat(b) * np.mat(a).I
+# x2 = b/a
+# print(x1,x2)
+# import flatten
+
+# print(flatten.flatten([[1],[2]]))
+
+# import numpy as np
+# from itertools import combinations 
+# import itertools
+# import collections
+# import flatten
+
+# def group(track_id):
+#     if len(track_id) > 1:
+#         track_id = flatten.flatten(track_id)
+#     track_id = sorted(track_id)
+#     return np.array(list(combinations(track_id, 2)))
+
+
+# print(group([[1],[2],[3]]))
+# print(group([1,2,3]))
+
+
 import numpy as np
-from scipy.linalg import solve
-a = np.array([[1, 1, 7], [2, 3, 5], [4, 2, 6]])
-b = np.array([2, 3, 4])
-x1 = solve(a, b)
-# x2 = np.mat(b) * np.mat(a).I
-x2 = b/a
-print(x1,x2)
+import cupy as cp
+import time
+ 
+x=np.zeros((1024,512,4,4))*1024.
+y=np.zeros((1024,512,4,1))*512.3254
+time1=time.time()
+for i in range(20):
+    z=x*y
+print('average time for 20 times cpu:',(time.time()-time1)/20.)
+ 
+x=cp.zeros((1024,512,4,4))*1024.
+y=cp.zeros((1024,512,4,1))*512.3254
+z=cp.zeros((10,20))
+a= cp.max(cp.array([[2,4,5,6],[4,0,6,7]]),axis=0)
+print(a)
+time1=time.time()
+for i in range(20):
+    z=x*y
+print('average time for 20 times gpu:',(time.time()-time1)/20.)
+
+# import tensorflow as tf
+# import timeit
+
+# with tf.device('/cpu:0'):
+#    cpu_a = tf.random.normal([10000, 1000])
+#    cpu_b = tf.random.normal([1000, 2000])
+#    print(cpu_a.device, cpu_b.device)
+
+# with tf.device('/gpu:0'):
+#    gpu_a = tf.random.normal([10000, 1000])
+#    gpu_b = tf.random.normal([1000, 2000])
+#    print(gpu_a.device, gpu_b.device)
+
+# def cpu_run():
+#    with tf.device('/cpu:0'):
+#       c = tf.matmul(cpu_a, cpu_b)
+#    return c
+
+# def gpu_run():
+#    with tf.device('/gpu:0'):
+#       c = tf.matmul(gpu_a, gpu_b)
+#    return c
+
+# # warm up 
+# cpu_time = timeit.timeit(cpu_run, number=10)
+# gpu_time = timeit.timeit(gpu_run, number=10)
+# print('warmup:', cpu_time, gpu_time)
+
+# cpu_time = timeit.timeit(cpu_run, number=10)
+# gpu_time = timeit.timeit(gpu_run, number=10)
+# print('run time:', cpu_time, gpu_time)

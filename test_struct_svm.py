@@ -20,7 +20,6 @@ def parfor(information, j):
     w = information[6]
     
     n_cluster = len(cluster)
-
     # if not isClusterLegal(cluster[couples[j,0]], cluster[couples[j,1]], X_test[str(i)]['detectedGroups']):!!!!!!!!
     if not isClusterLegal(cluster[couples[j,0]], cluster[couples[j,1]], X_test[i]['detectedGroups']):
         return [0, 0]
@@ -63,7 +62,6 @@ def test_struct_svm(X_test, Y_test, w):
     perf = np.zeros(len(X_test))
     for i in range(len(X_test)):
         print('.')
-
         # start with each element in its own cluster
         # cluster = dict()
         # xi_members = np.array(X_test[str(i)]['trackid'])
