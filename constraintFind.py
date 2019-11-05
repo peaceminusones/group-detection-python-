@@ -18,10 +18,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def parfor(information, i):
     """
-    y = information[0]
-    couples = information[1]
-    detectedGroups = information[2]
-    H_temp = information[3]
+    information = [y, couples, detectedGroups, H_temp, obj_Y_temp, n_cluster, X_train, Y_train, model_w]
     """
     y = information[0]
     couples = information[1]
@@ -101,6 +98,7 @@ def constraintFind(model_w, parameter, detectedGroups, X_train, Y_train):
     # 对每个行人都创建一个cluster
     y = [[pedestrians[i]] for i in range(len(pedestrians))]
     # print(y)
+    
     # make sure the first iteration verifies the condition
     changed = True
     while changed:

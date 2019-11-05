@@ -9,12 +9,6 @@ import flatten
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-# from numba.errors import NumbaDeprecationWarning, NumbaPendingDeprecationWarning, NumbaWarning
-# import warnings
-# warnings.simplefilter('ignore', category=NumbaWarning)
-# from numba import jit
-# @jit
-
 def featureMap(X_train, y):
     """
     参数：

@@ -10,7 +10,6 @@ from trainBCFW import trainBCFW
 from test_struct_svm import test_struct_svm
 from showCluster import showCluster
 
-
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
@@ -29,7 +28,7 @@ class model_par:
     useHMGroupDetection = False
 
 class model:
-    trainMe = True
+    trainMe = False
     preTrain_w = []
 
 
@@ -84,12 +83,13 @@ if __name__ == "__main__":
 
     else:
         print("Extraction from featureX")
-        # 直接从文件中提取特征
-        with open(dataDirectory + '/featureX.json', 'r') as f:
-            X = json.load(f)
-        print("Extraction from featureY1")
-        with open(dataDirectory + '/featureY1.json', 'r') as f:
-            Y = json.load(f)
+        # # 直接从文件中提取特征
+        # with open(dataDirectory + '/featureX.json', 'r') as f:
+        #     X = json.load(f)
+        # print("Extraction from featureY1")
+        # with open(dataDirectory + '/featureY1.json', 'r') as f:
+        #     Y = json.load(f)
+        X, Y = loadfeature(dataDirectory,"student003.mat")
         print("done!\n")
 
         # # ----------------------------------------------------------------------------------------
@@ -105,15 +105,13 @@ if __name__ == "__main__":
         # print("featureY1 -----------------done!\n")
         # # -----------------------------------------------------------------------------------------
         
-        # print(np.array(X[str(0)]['myfeatures']))
+        # print(np.array(X[0]['myfeatures']))
         # 放弃第三个特征（ganger）
         if model_par.features == [1, 1, 0, 1]:
             for i in range(len(X)):
-                feature_4 = np.array(X[str(i)]['myfeatures'])
-                X[str(i)]['myfeatures'] = feature_4[:,[0,1,3]]
-
-        # print(np.array(X[str(0)]['myfeatures']))
-        # print(Y)
+                feature_4 = np.array(X[i]['myfeatures'])
+                X[i]['myfeatures'] = feature_4[:,[0,1,3]]
+        # print(Y[0])
         """
         现在已经有了特征 --------------------------------------------------------------
             input data: X 
@@ -123,7 +121,7 @@ if __name__ == "__main__":
         n_feature = sum(model_par.features)
         mymax = np.zeros((1, n_feature))
         for i in range(model_par.trainingSetSize):
-            arrayX = np.abs(np.array(X[str(i)]['myfeatures']))
+            arrayX = np.abs(np.array(X[i]['myfeatures']))
             columnMax = np.amax(arrayX, axis=0)  # 得到每一列的最大值
             if columnMax.shape[0] > 0:
                 merge = np.vstack((mymax, columnMax))
@@ -133,66 +131,65 @@ if __name__ == "__main__":
         if 0 in mymax:
             mymax = np.zeros((1, n_feature))
             for i in range(model_par.testingSetSize):
-                arrayX = np.abs(np.array(X[str(i)]['myfeatures']))
+                arrayX = np.abs(np.array(X[i]['myfeatures']))
                 columnMax = np.amax(arrayX, axis=0)  # 得到每一列的最大值
                 if columnMax.shape[0] > 0:
                     merge = np.vstack((mymax, columnMax))
                     mymax = np.amax(merge, axis=0)
         # print(mymax)
+        # mymax = np.array([0.5776,2.2642,0.0553])
         # --------------------------------------------------------------------------------
-
         # 特征标准化 & 创建互补特征
         for i in range(model_par.trainingSetSize + model_par.testingSetSize):
             # make them similarity measures between 0 and 1
-            length = np.array(X[str(i)]['myfeatures']).shape[0]
+            length = np.array(X[i]['myfeatures']).shape[0]
             if  length > 0:
                 mymax_array2D = np.array([mymax for _ in range(length)])
-                X[str(i)]['myfeatures'] = 1 - (np.array(X[str(i)]['myfeatures']) / mymax_array2D)
+                X[i]['myfeatures'] = 1 - (np.array(X[i]['myfeatures']) / mymax_array2D)
 
             # 创建互补的特征，以更好地识别相似阈值
             for j in range(model_par.numberOfFeatures):
-                value = X[str(i)]['myfeatures'][:, j] - 1
-                X[str(i)]['myfeatures'] = np.insert(X[str(i)]['myfeatures'], model_par.numberOfFeatures + j, values=value, axis=1)
-        # print(X[str(0)]['myfeatures'])
+                value = X[i]['myfeatures'][:, j] - 1
+                X[i]['myfeatures'] = np.insert(X[i]['myfeatures'], model_par.numberOfFeatures + j, values=value, axis=1)
+        # print(X[0]['myfeatures'])
         print("data: " + dataDirectory + ", training: " + str(model_par.trainingSetSize) + ", testing: " + str(model_par.testingSetSize))
         """
         # Training ----------------------------------------------------------
         # """
         model_par.testingSetSize = model_par.testingSetSize + model_par.trainingSetSize
-        X_test = [X[str(i)] for i in range(model_par.testingSetSize)]
-        Y_test = [Y[str(i)] for i in range(model_par.testingSetSize)]
-        X_train = [X[str(i)] for i in range(model_par.trainingSetSize)]
-        Y_train = [Y[str(i)] for i in range(model_par.trainingSetSize)]
-        # print(X_test[str(0)]['trackid'])
+        X_test = X
+        Y_test = Y
+        X_train = [X[i] for i in range(model_par.trainingSetSize)]
+        Y_train = [Y[i] for i in range(model_par.trainingSetSize)]
+        # print(X_test[0]['trackid'])
         # print(X_train[0]['trackid'])
 
         if model.trainMe:
             print("\nTraining the classifier on the training set:\n")
             modelBCFW_weight= trainBCFW(X_train, Y_train)
             print("modelBCFW_weight=\n", modelBCFW_weight)
-        # else:
-        #     # modelBCFW_weight = model.preTrain_w
-        #     # modelBCFW_weight = np.array([[-0.00482523],[ 0.00467267],[ 0.005967  ],[-0.0016145 ],[-0.0047506 ],[ 0.0028309 ],[ 0.00153657],[-0.00796133]])
-        #     # modelBCFW_weight = np.array([[-0.0356655111340553],[0.0246113342594141],[0.00524166773229231],[-0.0124222568704902],[-0.0442202270483166],[0.0160566183451527],[-0.00331304818196912],[-0.0209769727847515]])
-        #     # modelBCFW_weight = np.array([[-0.01126997],[ 0.0007279 ],[-0.00283754],[-0.00679829],[-0.00511671],[-0.00115596],[ 0.00240948],[-0.00958839]])
-        #     modelBCFW_weight = np.array([[-0.05756384],[ 0.0133388 ],[-0.046953  ],[-0.03847554],[ 0.0324271 ],[-0.0278647 ]])
-        #     # modelBCFW_weight = np.array([[-1.09332335e-02],[ 4.70989304e-03],[ 9.51981444e-05],[-1.11421200e-02],[-1.08864029e-02],[ 3.50915218e-04],[ 4.96561011e-03],[-1.06775165e-02]])
-        #     print("\nLoad model weight: " + str(modelBCFW_weight.T[0]))
+        else:
+            # modelBCFW_weight = model.preTrain_w
+            # modelBCFW_weight = np.array([[-0.00482523],[ 0.00467267],[ 0.005967  ],[-0.0016145 ],[-0.0047506 ],[ 0.0028309 ],[ 0.00153657],[-0.00796133]])
+            # modelBCFW_weight = np.array([[-0.0356655111340553],[0.0246113342594141],[0.00524166773229231],[-0.0124222568704902],[-0.0442202270483166],[0.0160566183451527],[-0.00331304818196912],[-0.0209769727847515]])
+            # modelBCFW_weight = np.array([[-0.01126997],[ 0.0007279 ],[-0.00283754],[-0.00679829],[-0.00511671],[-0.00115596],[ 0.00240948],[-0.00958839]])
+            # modelBCFW_weight = np.array([[-0.05756384],[ 0.0133388 ],[-0.046953  ],[-0.03847554],[ 0.0324271 ],[-0.0278647 ]])
+            modelBCFW_weight = np.array([[-0.04117593],[ 0.03313556],[-0.01064547],[-0.06374352],[ 0.01056798],[-0.03321306]])
+            # modelBCFW_weight = np.array([[-1.09332335e-02],[ 4.70989304e-03],[ 9.51981444e-05],[-1.11421200e-02],[-1.08864029e-02],[ 3.50915218e-04],[ 4.96561011e-03],[-1.06775165e-02]])
+            print("\nLoad model weight: " + str(modelBCFW_weight.T[0]))
 
-        # """
-        # Testing ----------------------------------------------------------
-        # """
-
-        # print("\nTesting the classifier on the testing set:\n")
-        # model_par.testingSetSize = model_par.testingSetSize + model_par.trainingSetSize
-        # myY_test, absolute_error_test, p_test, r_test, perf = test_struct_svm (X_test, Y_test, modelBCFW_weight)
-        # print(myY_test)
-        # print(absolute_error_test)
-        # print(p_test)
-        # print(r_test)
-        # print(perf)
-        # output_test = np.round(np.array([absolute_error_test, p_test, r_test])/model_par.trainingSetSize*100*100)/100
-        # print('Testing error: ',output_test[0], '%% (Precision: ',output_test[1],'%%, Recall: ',output_test[2],'%%)\n')
+        """
+        Testing ----------------------------------------------------------
+        """
+        print("\nTesting the classifier on the testing set:\n")
+        myY_test, absolute_error_test, p_test, r_test, perf = test_struct_svm (X_test, Y_test, modelBCFW_weight)
+        print("myY_test: \n", myY_test)
+        print(absolute_error_test)
+        print(p_test)
+        print(r_test)
+        print(perf)
+        output_test = np.round(np.array([absolute_error_test, p_test, r_test])/model_par.testingSetSize*100*100)/100
+        print('Testing error: ',output_test[0], '%% (Precision: ',output_test[1],'%%, Recall: ',output_test[2],'%%)\n')
         
         # myY_test = {0: [[18, 19, 20], [28, 30, 27, 29, 6, 2], [73, 74], [10, 12, 11, 13], [215, 216], [219, 220, 217], [9, 273], [77, 78], [7, 8], [14, 16], [213, 214], [1], [3], [4], [5], [15], [17], [21], [22], [23], [24], [25], [26], [31], [75], [76], [218], [274], [409]],
         #             1: [[24, 420, 419, 37], [217, 220], [4, 75], [77, 78], [35, 36], [33, 34], [14, 16], [27, 29], [19, 20], [28, 30], [12, 13, 10], [3], [5], [7], [8], [9], [11], [17], [23], [25], [26], [31], [32], [73], [74], [76], [79], [80], [81], [82], [83], [219], [315], [410], [411]],

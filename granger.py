@@ -5,9 +5,7 @@ import numpy as np
 import pandas as pd
 import math
 import scipy.signal as signal
-import numba as nb
 
-# @nb.njit(nopython=True)
 def granger(traj1, traj2):
     g = 4
     # 两个轨迹的frameid，并得到同时出现的frameid，即traj1_f和traj2_f的交集
@@ -126,7 +124,6 @@ def granger(traj1, traj2):
 
     return F
 
-@nb.jit
 def npmean(t):
     t_mean = np.zeros(t.shape[1])
     for i in range(t.shape[1]):

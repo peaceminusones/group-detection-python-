@@ -5,9 +5,7 @@
 import numpy as np 
 import math
 import copy
-import numba as nb
 
-@nb.jit
 def heatmap(traj1, traj2, video_par):
 
     # units of measurements

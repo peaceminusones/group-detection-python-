@@ -5,7 +5,6 @@ import numpy as np
 import math
 import numba as nb
 
-@nb.jit
 def prox(traj1_f, traj2_f, traj1, traj2):
     interset_f = sorted(list(set(traj1_f) & set(traj2_f)))
     if len(interset_f) == 0:
@@ -39,3 +38,6 @@ def pow_minus(list_x, n):
 def exp(list_x):
     s = np.array(list(map(lambda x: math.exp(x), list_x)))
     return s
+
+# if __name__ == "__main__":
+
