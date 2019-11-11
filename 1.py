@@ -125,27 +125,26 @@
 # print(group([[1],[2],[3]]))
 # print(group([1,2,3]))
 
-
-import numpy as np
-import cupy as cp
-import time
+# import numpy as np
+# import cupy as cp
+# import time
  
-x=np.zeros((1024,512,4,4))*1024.
-y=np.zeros((1024,512,4,1))*512.3254
-time1=time.time()
-for i in range(20):
-    z=x*y
-print('average time for 20 times cpu:',(time.time()-time1)/20.)
+# x=np.zeros((1024,512,4,4))*1024.
+# y=np.zeros((1024,512,4,1))*512.3254
+# time1=time.time()
+# for i in range(20):
+#     z=x*y
+# print('average time for 20 times cpu:',(time.time()-time1)/20.)
  
-x=cp.zeros((1024,512,4,4))*1024.
-y=cp.zeros((1024,512,4,1))*512.3254
-z=cp.zeros((10,20))
-a= cp.max(cp.array([[2,4,5,6],[4,0,6,7]]),axis=0)
-print(a)
-time1=time.time()
-for i in range(20):
-    z=x*y
-print('average time for 20 times gpu:',(time.time()-time1)/20.)
+# x=cp.zeros((1024,512,4,4))*1024.
+# y=cp.zeros((1024,512,4,1))*512.3254
+# z=cp.zeros((10,20))
+# a= cp.max(cp.array([[2,4,5,6],[4,0,6,7]]),axis=0)
+# print(a)
+# time1=time.time()
+# for i in range(20):
+#     z=x*y
+# print('average time for 20 times gpu:',(time.time()-time1)/20.)
 
 # import tensorflow as tf
 # import timeit
@@ -178,3 +177,61 @@ print('average time for 20 times gpu:',(time.time()-time1)/20.)
 # cpu_time = timeit.timeit(cpu_run, number=10)
 # gpu_time = timeit.timeit(gpu_run, number=10)
 # print('run time:', cpu_time, gpu_time)
+
+
+import matplotlib.pyplot as plt
+import numpy as np
+import time
+from math import *
+
+# plt.ion() #开启interactive mode 成功的关键函数
+# plt.figure(1)
+# t = [0]
+# t_now = 0
+# m = [sin(t_now)]
+
+# for i in range(2000):
+#     plt.clf() #清空画布上的所有内容
+#     t_now = i*0.1
+#     t.append(t_now)#模拟数据增量流入，保存历史数据
+#     m.append(sin(t_now))#模拟数据增量流入，保存历史数据
+#     plt.plot(t,m,'-r')
+#     plt.pause(0.01)
+
+# -*- coding: utf-8 -*-
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.spatial import ConvexHull
+##########scipy 凸包################
+# points = np.random.rand(30, 2)
+points = np.array([[680.,489.],
+ [675.32088886,501.85575219],
+ [663.47296355,508.69615506],
+ [650.        ,506.32050808],
+ [641.20614758,495.84040287],
+ [641.20614758,482.15959713],
+ [650.        ,471.67949192],
+ [663.47296355,469.30384494],
+ [675.32088886,476.14424781],
+ [680.        ,489.        ],
+ [700.        ,455.        ],
+ [695.32088886,467.85575219],
+ [683.47296355,474.69615506],
+ [670.        ,472.32050808],
+ [661.20614758,461.84040287],
+ [661.20614758,448.15959713],
+ [670.        ,437.67949192],
+ [683.47296355,435.30384494],
+ [695.32088886,442.14424781],
+ [700.        ,455.        ]])
+# print(points)
+hull = ConvexHull(points)
+# plt.plot(points[:,0], points[:,1], 'o')
+# hull.vertices 得到凸轮廓坐标的索引值，逆时针画
+hull1=hull.vertices.tolist()#要闭合必须再回到起点[0]
+hull1.append(hull1[0])
+plt.plot(points[hull1,0], points[hull1,1], 'r--',lw=2)
+# for i in range(len(hull1)-1):
+#     plt.text(points[hull1[i],0], points[hull1[i],1],str(i),fontsize=20)
+plt.show()
