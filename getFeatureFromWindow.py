@@ -98,33 +98,33 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
         """
             1) compute proxemics: physical distance | feature_pd 
         """
-        # if model_par.features[0] == 1:
-        #     traj1_frameid = traj1.iloc[:,0].values
-        #     traj2_frameid = traj2.iloc[:,0].values
-        #     # traj_1 = traj1.values
-        #     # traj_2 = traj2.values
-        #     feature_pd[i] = prox(traj1_frameid, traj2_frameid, traj_1, traj_2)
-        # """
-        #     2) compute MD-DTW: trajectory shape  |  feature_ts
-        # """
-        # if model_par.features[1] == 1:
-        #     # traj_1 = traj1.values
-        #     # traj_2 = traj2.values
-        #     dist, k= dtw(traj_1, traj_2)
-        #     # 由于距离很大程度上取决于被比较的点的数量，所以它必须被标准化
-        #     feature_ts[i] = dist/k
-        # """
-        #     3) compute GRANGER CAUSALITY: motion causality  |  feature_mc
-        # """
-        # if model_par.features[2] == 1:
-        #     # traj_1 = traj1.values
-        #     # traj_2 = traj2.values
-        #     # F1 = granger(traj_1, traj_2)
-        #     # F2 = granger(traj_2, traj_1)
-        #     F1 = granger(traj1, traj2)
-        #     F2 = granger(traj2, traj1)
-        #     feature_mc[i] = max(F1, F2)
-        #     print(feature_mc[i])
+        if model_par.features[0] == 1:
+            traj1_frameid = traj1.iloc[:,0].values
+            traj2_frameid = traj2.iloc[:,0].values
+            # traj_1 = traj1.values
+            # traj_2 = traj2.values
+            feature_pd[i] = prox(traj1_frameid, traj2_frameid, traj_1, traj_2)
+        """
+            2) compute MD-DTW: trajectory shape  |  feature_ts
+        """
+        if model_par.features[1] == 1:
+            # traj_1 = traj1.values
+            # traj_2 = traj2.values
+            dist, k= dtw(traj_1, traj_2)
+            # 由于距离很大程度上取决于被比较的点的数量，所以它必须被标准化
+            feature_ts[i] = dist/k
+        """
+            3) compute GRANGER CAUSALITY: motion causality  |  feature_mc
+        """
+        if model_par.features[2] == 1:
+            # traj_1 = traj1.values
+            # traj_2 = traj2.values
+            # F1 = granger(traj_1, traj_2)
+            # F2 = granger(traj_2, traj_1)
+            F1 = granger(traj1, traj2)
+            F2 = granger(traj2, traj1)
+            feature_mc[i] = max(F1, F2)
+            print(feature_mc[i])
         """
             4) compute HEAT MAPS: paths convergence |  feature_pc
         """

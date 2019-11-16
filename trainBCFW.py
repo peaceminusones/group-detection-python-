@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import time
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 def trainBCFW(X_train, Y_train):
     """
         X_train--------------------------------------------------------------------------------
@@ -25,12 +26,6 @@ def trainBCFW(X_train, Y_train):
 
     if len(X_train) == 0:
         return model_w
-    
-    # pattern = dict()
-    # labels = dict()
-    # for i in range(len(X_train)):
-    #     pattern[i] = X_train[i]
-    #     labels[i] = Y_train[i]
 
     # initial parameter
     parameter = dict()
@@ -38,7 +33,6 @@ def trainBCFW(X_train, Y_train):
     parameter['maxIter'] = 500      # maximum number of iterations
 
     detectedGroups = [X_train[i]['detectedGroups'] for i in range(len(X_train))]
-    # F = [X_train[i]['F'] for i in range(len(X_train))]
     
     # initialize variables
     n_it = parameter['maxIter']  # 迭代次数：500
@@ -71,14 +65,9 @@ def trainBCFW(X_train, Y_train):
         # find the most violated
         model_w = w
         y_star = cf.constraintFind(model_w, parameter, detectedGroups[iblock], X_train[iblock], Y_train[iblock])
-        # star_y = []
-        # star_y.append([[[377], [425]], [[321], [376]], [[243], [320]], [[238], [242]], [[122], [124]], [[110], [113]], [[67], [104]], [64], [65], [66], [70], [71], [72], [103], [106], [107], [108], [109], [111], [112], [114], [115], [116], [117], [118], [119], [120], [121], [123], [232], [233], [236], [237], [244], [245], [246], [247], [322], [323], [345], [346], [350], [351], [352], [353], [378], [379], [421], [422], [423], [426], [427], [428], [429]])
-        # star_y.append([[[320], [321], [124], [376], [122], [425], [67], [243], [242], [377], [110], [238], [104], [113], [123], [236], [245], [247], [352], [429], [379], [232], [107], [421], [65], [70], [112], [108], [119], [117], [72], [346], [323], [244], [237], [120], [121], [233], [106], [64], [66], [111], [353], [71], [428], [246], [426], [423], [109], [118], [115], [114], [116], [378], [103], [351], [350], [345], [322], [422], [427]]])
-        # y_star = star_y[k]
         print("y_star: ",y_star)
         
         # compute the loss at the new point
-        # l_s = ((1/lambda_c)/n)*loss.lossGM(Y_train[iblock], y_star)
         delta,_,_ = loss.lossGM(Y_train[iblock], y_star)
         l_s = (1/n)*delta
         print("l_s: ",l_s)

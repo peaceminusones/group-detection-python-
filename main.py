@@ -184,7 +184,7 @@ if __name__ == "__main__":
         """
         if model.testMe:
             print("\nTesting the classifier on the testing set:\n")
-            myY_test, absolute_error_test, p_test, r_test, perf = test_struct_svm (X_test, Y_test, modelBCFW_weight)
+            myY_test, absolute_error_test, p_test, r_test, perf = test_struct_svm(X_test, Y_test, modelBCFW_weight)
             print("myY_test: \n", myY_test)
             print(absolute_error_test)
             print(p_test)

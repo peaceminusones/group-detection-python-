@@ -16,7 +16,7 @@ def showCluster(myF, Y_test, Y_pred, model_par, video_par, dataDirectory):
     n_subplots = 4
     index_start = 0
     index_end= index_start
-    colors = 'rgbmcykw'
+    colors = 'rgmcyb'
     allpath = dict()
     # # GUI----------------------------------
     # root = Tk()
@@ -82,8 +82,8 @@ def showCluster(myF, Y_test, Y_pred, model_par, video_par, dataDirectory):
                             # print(ppi2)
                             # im = cv2.imread("D:\\group detection and prediction\\group-detection-python\\mydata\\student003" + '\\' + SixNumber(f) + '.jpg')
                             # plt.imshow(im)
-                            c = colors[index_found_ground % 8]
-                            plt.plot(ppi1, ppi2, '-r', color = c)
+                            c = colors[index_found_ground % len(colors)]
+                            plt.plot(ppi1, ppi2, '-', color = c)
                             h1.append(plt.text(ppi1[-1], ppi2[-1], str(pedestrain[i])))
                         else:
                             ppi1 = np.array(path[pedestrain[i]])[:,2]
@@ -91,8 +91,8 @@ def showCluster(myF, Y_test, Y_pred, model_par, video_par, dataDirectory):
                             # print("no")
                             # print(ppi1)
                             # print(ppi2)
-                            c = colors[index_found_ground % 8]
-                            plt.plot(ppi1, ppi2, '-r', color = c)
+                            c = colors[index_found_ground % len(colors)]
+                            plt.plot(ppi1, ppi2, '-', color = c)
                             h1.append(plt.text(ppi1[-1], ppi2[-1], str(pedestrain[i])))
                         
                     if video_par['xyReversed']:
@@ -110,24 +110,24 @@ def showCluster(myF, Y_test, Y_pred, model_par, video_par, dataDirectory):
                             if video_par['xyReversed']:
                                 ppi1 = np.array(path[pedestrain[i]])[:,1]
                                 ppi2 = np.array(path[pedestrain[i]])[:,2]
-                                c = colors[index_found_ground % 8]
+                                c = colors[index_found_ground % len(colors)]
                                 plt.plot(ppi1, ppi2, 'k')
                             else:
                                 ppi1 = np.array(path[pedestrain[i]])[:,2]
                                 ppi2 = np.array(path[pedestrain[i]])[:,1]
-                                c = colors[index_found_ground % 8]
+                                c = colors[index_found_ground % len(colors)]
                                 plt.plot(ppi1, ppi2, 'k')
                         else:
                             if video_par['xyReversed']:
                                 ppi1 = np.array(path[pedestrain[i]])[:,1]
                                 ppi2 = np.array(path[pedestrain[i]])[:,2]
-                                c = colors[index_found_ground % 8]
+                                c = colors[index_found_ground % len(colors)]
                                 plt.plot(ppi1, ppi2, color = c)
                                 h2.append(plt.text(ppi1[-1], ppi2[-1], str(pedestrain[i])))
                             else:
                                 ppi1 = np.array(path[pedestrain[i]])[:,2]
                                 ppi2 = np.array(path[pedestrain[i]])[:,1]
-                                c = colors[index_found_ground % 8]
+                                c = colors[index_found_ground % len(colors)]
                                 plt.plot(ppi1, ppi2, color = c)
                                 h2.append(plt.text(ppi1[-1], ppi2[-1], str(pedestrain[i])))
                         if video_par['xyReversed']:
@@ -141,16 +141,45 @@ def showCluster(myF, Y_test, Y_pred, model_par, video_par, dataDirectory):
 
             circle = []
             if video_par['videoObj'] and (f % video_par['downsampling'] == start_frame % video_par['downsampling']):
+                t = np.linspace(0, 2*math.pi, 10)
+                r = 20
                 myvideo = cv2.imread(video_par['videoObj']%f)
                 sp = myvideo.shape
                 plt.subplot(223)
+                plt.cla()
                 plt.imshow(myvideo)
+                for p in range(len(Y_test[j])):
+                    if len(Y_test[j][p]) > 1:
+                        cluster_points = np.zeros(2)
+                        for q in range(len(Y_test[j][p])):
+                            if Y_test[j][p][q] in pedestrain:
+                                pedestrain_id = Y_test[j][p][q][0]
+                                data = np.array([[path[pedestrain_id][-1][1], path[pedestrain_id][-1][2]]])
+                                data = np.append(np.array(data), np.ones((data.shape[0], 1)))
+                                data = np.dot(video_par['H'], data)
+                                repmat = np.array([data[2] for _ in range(3)])
+                                data = np.round(data/repmat)
+                                
+                                x = np.array([r*math.cos(t[i]) + data[0] for i in range(len(t))]).reshape(-1,1)
+                                y = np.array([r*math.sin(t[i]) + data[1] for i in range(len(t))]).reshape(-1,1)
+                                comb = np.hstack((x,y))
+                                cluster_points = np.vstack((cluster_points, comb))
+                        cluster_points = np.delete(cluster_points, 0, axis=0)
+                        # print("before --------------------------")
+                        # print(cluster_points)
+                        if cluster_points.shape[0] > 0 and cluster_points.shape[0] > 1:
+                            # print("after ----------------------------")
+                            # print(cluster_points)
+                            k = ConvexHull(cluster_points)
+                            k1 = k.vertices.tolist()
+                            k1.append(k1[0]) #要闭合必须再回到起点[0]
+                            # print(k1)
+                            c = colors[p % len(colors)]
+                            circle = plt.plot(cluster_points[k1,0], cluster_points[k1,1], color = c, alpha=1)
 
                 plt.subplot(224)
                 plt.cla()
                 plt.imshow(myvideo, shape=sp)
-                t = np.linspace(0, 2*math.pi, 10)
-                r = 20
                 for p in range(len(Y_pred[j])):
                     if len(Y_pred[j][p]) > 1:
                         cluster_points = np.zeros(2)
@@ -177,12 +206,13 @@ def showCluster(myF, Y_test, Y_pred, model_par, video_par, dataDirectory):
                             k1 = k.vertices.tolist()
                             k1.append(k1[0]) #要闭合必须再回到起点[0]
                             # print(k1)
-                            c = colors[p % 8]
+                            c = colors[p % len(colors)]
                             circle = plt.plot(cluster_points[k1,0], cluster_points[k1,1], color = c, alpha=1)
 
             plt.draw()
             plt.pause(0.01)
-
+            plt.savefig("D:/pedestrian analysis/group detection and prediction/group-detection-python/frame/frame_" + str(f) + ".png")
+            
             for i in range(len(h1)):
                 plt.Text.set_visible(h1[i], b = False)
             for i in range(len(h2)):
