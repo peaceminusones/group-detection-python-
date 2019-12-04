@@ -2,6 +2,7 @@
  extract trajectory feature:
 """
 import numpy as np
+import math
 import pandas as pd
 from itertools import combinations 
 from prox import prox
@@ -9,6 +10,9 @@ from granger import granger
 from dtw import dtw
 from heatmap import heatmap
 from detectGroups import detectGroups
+from v_similar import v_similar
+from orientation import orientation
+import flatten
 
 def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
     # 需要把10s内所有帧的数组提出来
@@ -74,86 +78,124 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
 
         physical distance |  feature_pd  |  prox
         trajectory shape  |  feature_ts  |  dtw
-        motion causality  |  feature_mc  |  granger causality
+        motion causality  |  feature_vs  |  velocity
         paths convergence |  feature_pc  |  heatmap
     """
     # 通过track_id先将两两行人形成初始化的组，对于数据集student003大小为：（1128，2）
-    couples = group(track_id)
+    couples, singles = group(path, track_id)
+    # couples = group(track_id)
     
-    feature_pd = np.zeros((couples.shape[0], 1))
-    feature_ts = np.zeros((couples.shape[0], 1))
-    feature_mc = np.zeros((couples.shape[0], 1))
-    feature_pc = np.zeros((couples.shape[0], 1))
+    feature_pd = np.zeros((len(couples), 1))
+    feature_ts = np.zeros((len(couples), 1))
+    feature_vs = np.zeros((len(couples), 1))
+    feature_pc = np.zeros((len(couples), 1))
+    # feature_pd = np.zeros((couples.shape[0], 1))
+    # feature_ts = np.zeros((couples.shape[0], 1))
+    # feature_vs = np.zeros((couples.shape[0], 1))
+    # feature_pc = np.zeros((couples.shape[0], 1))
 
     allHeatMaps = dict()
     detectedGroup = dict()
     
-    # compute features for each couple
-    for i in range(couples.shape[0]):
+    # compute features for each couple  couples.shape[0]
+    for i in range(len(couples)):
         # 提取出第i行的couple的两个轨迹，数据类型都是dataframe
-        traj1 = path[couples[i,0]]
-        traj2 = path[couples[i,1]]
+        traj1 = path[couples[i][0][0]]
+        traj2 = path[couples[i][1][0]]
         traj_1 = traj1.values
         traj_2 = traj2.values
+        # print(traj_1)
+        # print(traj_2)
+        # print("id:",couples[i,0],couples[i,1])
+        # print("len:",traj_1.shape[0],traj_2.shape[0])
+        # print(traj_1,traj_2)
         """
             1) compute proxemics: physical distance | feature_pd 
         """
         if model_par.features[0] == 1:
             traj1_frameid = traj1.iloc[:,0].values
             traj2_frameid = traj2.iloc[:,0].values
-            # traj_1 = traj1.values
-            # traj_2 = traj2.values
             feature_pd[i] = prox(traj1_frameid, traj2_frameid, traj_1, traj_2)
         """
             2) compute MD-DTW: trajectory shape  |  feature_ts
         """
         if model_par.features[1] == 1:
-            # traj_1 = traj1.values
-            # traj_2 = traj2.values
             dist, k= dtw(traj_1, traj_2)
             # 由于距离很大程度上取决于被比较的点的数量，所以它必须被标准化
             feature_ts[i] = dist/k
         """
-            3) compute GRANGER CAUSALITY: motion causality  |  feature_mc
+            3) compute : velocity similarity  |  feature_vs
         """
         if model_par.features[2] == 1:
-            # traj_1 = traj1.values
-            # traj_2 = traj2.values
             # F1 = granger(traj_1, traj_2)
             # F2 = granger(traj_2, traj_1)
-            F1 = granger(traj1, traj2)
-            F2 = granger(traj2, traj1)
-            feature_mc[i] = max(F1, F2)
-            print(feature_mc[i])
+            # F1 = granger(traj1, traj2)
+            # F2 = granger(traj2, traj1)
+            # feature_mc[i] = max(F1, F2)
+            # print(feature_mc[i])
+            dist, k = v_similar(traj_1, traj_2)
+            feature_vs[i] = dist/k
         """
             4) compute HEAT MAPS: paths convergence |  feature_pc
+            modification: 利用“匀速直线运动”得到未来运动的方向，然后利用方向夹角得到特征
         """
+        # if model_par.features[3] == 1:
+        #     allHeatMaps[i], feature_pc[i] = heatmap(traj_1[:, 0:3], traj_2[:, 0:3], video_par)
+        #     # if model_par.features[3] != 1:
+        # else:
+        #     feature_pc[i] = 0
         if model_par.features[3] == 1:
-            # traj_1 = traj1.values
-            # traj_2 = traj2.values
-            allHeatMaps[i], feature_pc[i] = heatmap(traj_1[:, 0:3], traj_2[:, 0:3], video_par)
-            if model_par.features[3] != 1:
-                feature_pc[i] = 0
-            print(feature_pc[i])
+            feature_pc[i] = orientation(traj_1[:, 0:5], traj_2[:, 0:5])
+        
         # print(feature_pd[i])
         # print(feature_ts[i])
-        # print(feature_mc[i])
+        # print(feature_vs[i])
         # print(feature_pc[i])
     
     # 把四个特征列向量组合成一个n*4的二维矩阵[feature_pd, feature_ts, feature_mc, feature_pc]
     myfeatures = np.concatenate((feature_pd, feature_ts),axis = 1)
-    myfeatures = np.concatenate((myfeatures, feature_mc),axis = 1)
+    myfeatures = np.concatenate((myfeatures, feature_vs),axis = 1)
     myfeatures = np.concatenate((myfeatures, feature_pc),axis = 1)
     
     """
         HEAT MAPS COARSE GROUP DETECTION -------------------------------------------------------------------------------
     """
-    detectedGroup[0] = couples.tolist()
+    detectedGroup[0] = couples
 
     if model_par.useHMGroupDetection:
         detectedGroup = detectGroups(couples, allHeatMaps)
     
-    return [track_id, F, couples, myfeatures, detectedGroup]
+    return [track_id, F, couples, singles, myfeatures, detectedGroup]
 
-def group(track_id):
-    return np.array(list(combinations(track_id, 2)))
+
+def group(path, track_id):
+    couples = np.array(list(combinations(track_id, 2)))
+    # dist = []
+    friends = []
+    for c in couples:
+        [frameid0,px0,py0,vx0,vy0] = path[c[0]].iloc[-1].values
+        [frameid1,px1,py1,vx1,vy1] = path[c[1]].iloc[-1].values
+        d = math.pow(math.pow(px0 - px1 ,2) + math.pow(py0 - py1 ,2), 0.5)
+        # dist.append(d)
+        if d > 5:  # 换数据集的话需要改！！！！！！！！！！！！！！！！！！！
+            continue
+        friends.append([[c[0]],[c[1]]])
+        # print(path[c[0]])
+        # print(px0,py0,vx0,vy0)
+        # print(path[c[1]])
+        # print(px1,py1,vx1,vy1)
+    # print(sorted(dist))
+    # print(track_id)
+    # print(couples)
+    # print(couples.shape[0])
+    # friends = np.array(friends)
+    # print(friends)
+    # print(friends.shape[0])
+    a = flatten.flatten(friends)
+    b = track_id
+    singles = list(set(b).difference(set(a)))
+    singles = [[singles[i]] for i in range(len(singles))]
+    return friends, singles
+
+# def group(track_id):
+#     return np.array(list(combinations(track_id, 2)))

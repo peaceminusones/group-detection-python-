@@ -21,6 +21,7 @@ import pandas as pd          # dataframe
 from scipy.io import loadmat # 读取.mat文件
 import collections           # flatten
 import re                    # 正则
+import numpy as np 
 
 dataDirectory= "mydata/student003"
 
@@ -107,6 +108,69 @@ def flatten(x):
 #     print(myF.iloc[1,2])
     
 
+class DataLoader():
+    def __init__(self, datasets, col):
+        self.dataframe = dict()
+        self.col = col
+        for i in range(len(datasets)):
+            # print()# loadData("load from file", datasets[i])
+            if os.path.exists(datasets[i] + "/trajectories.txt"):
+                self.dataframe[i] = pd.read_csv(datasets[i] + "/trajectories.txt", sep=' ', header=None)
+            else:
+                print("Doesn't exist the file: " + datasets[i] + "/trajectories.txt")
+                return
+        # print(self.dataframe)
+    
+    def get_train_data(self,seq_len):
+        x = []
+        y = []
+        for i in range(len(self.dataframe)):
+            '''
+                循环把每个数据集中的轨迹信息都提取出来
+            '''
+            df = self.dataframe[i]
+            # 把当前数据集的的行人id都提取出来
+            track_id = sorted(set(df.values[:,1].astype(int)))
+            # 计算每个人在场景中待了多久（多少个frame），如果时间过短
+            # 就不够lstm训练，则从数据中删除
+            for j in range(len(track_id)):
+                if len(df[df[1] == track_id[j]]) < 14:
+                    # 筛选出要删除的数据
+                    choosebytrackid = df[df[1] == track_id[j]]
+                    # 得到每行的行号，然后逐个删除
+                    row = choosebytrackid.iloc[:,0].index.values
+                    df = df.drop(index = row)
+            # 重新索引，并更新track_id
+            df = df.reset_index(drop=True)
+            track_id = sorted(set(df.values[:, 1].astype(int)))
+
+            # 根据track_id提取该数据集下的所有轨迹
+            for t in track_id:
+                choosebytrackid = df[df[1] == t]
+                path = choosebytrackid.iloc[:,[2,4]] # 提取position(x,y)
+                traj = path.values
+                # 提取速度信息
+                trajectoryPlusVeloc = []
+                for i in range(traj.shape[0]):
+                    if i == 0:
+                        # 每条轨迹的第一个位置，由于没有之前的位置，所以速度置为nan
+                        v_nan = np.insert(traj[0], len(traj[0]), values=[np.nan, np.nan])
+                        trajectoryPlusVeloc.append(list(v_nan))
+                    else:
+                        # 计算之后所有位置的速度(x方向和y方向)
+                        vx = traj[i, 0] - traj[i-1, 0]
+                        vy = traj[i, 1] - traj[i-1, 1]
+                        velocity = np.insert(traj[i], len(traj[i]), values=[vx, vy])
+                        trajectoryPlusVeloc.append(list(velocity))
+                # 把含有速度特征的轨迹信息替换到path变量中，其中trajectoryPlusVeloc是array类型，又转换为dataframe类型再替换
+                path = pd.DataFrame(np.delete(trajectoryPlusVeloc, 0, 0))  # 删除第一行，因为如果有速度特征的话，第一行的速度值为Nan
+                
+                # for p in range(len(path)-seq_len):
+                #     x.append()
+            break
+
+
+        return x,y
 
 
 

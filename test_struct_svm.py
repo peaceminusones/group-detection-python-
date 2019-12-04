@@ -74,8 +74,10 @@ def test_struct_svm(X_test, Y_test, w):
         # for j in range(xi_members.shape[0]):
         #     cluster[j] = xi_members[j]
         # % start with each element in its own cluster
-        xi_members = X_test[i]['trackid']
-        cluster = [xi_members[j] for j in range(len(xi_members))]
+        Xi_test_couples = X_test[i]['couples']
+        # xi_members = X_test[i]['trackid']
+        xi_members = flatten.flatten_only(Xi_test_couples)
+        cluster = [[xi_members[j]] for j in range(len(xi_members))]
         # get the number of clusters
         n_clusters = len(cluster)
         # if there is more than one cluster try to merge two of them!
@@ -87,7 +89,8 @@ def test_struct_svm(X_test, Y_test, w):
             # print(X_test[i])
             # print(Y_test[i])
             # print("------------------------------------")
-            psi = fm.featureMap(X_test[i], cluster)
+            print(cluster)
+            psi = fm.featureMap(X_test[i], Y_test) - fm.featureMap(X_test[i], cluster)
             # print(psi)
             # psi = np.zeros(X_test[i]['myfeatures'].shape[1])
             # # loop through each cluster
@@ -134,18 +137,12 @@ def test_struct_svm(X_test, Y_test, w):
                 # print(cluster)
                 changed = True
 
-            
             n_clusters = len(cluster)
 
         myY[i] = cluster
         print(cluster)
         print(Y_test[i])
-        # # 处理cluster成lossGM可以处理的格式
-        # for j in range(len(cluster)):
-        #     if len(cluster[j]) > 1:
-        #         cluster[j] = flatten.flatten(cluster[j])
         
-        # delta, p, r  = loss.lossGM(cluster, Y_test[str(i)])!!!!!!!!!!
         delta, p, r  = loss.lossGM(cluster, Y_test[i])
         p_abs = p_abs + p
         r_abs = r_abs + r

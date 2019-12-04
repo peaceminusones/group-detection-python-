@@ -56,6 +56,25 @@ def detectGroups(couples, allHeatMaps):
             else:
                 changed[i] = 0
                 continue
-        
-
     return detectedGroups
+
+# def detectGroups(X, Y):
+#     """
+#     利用距离初步筛选当前窗口下可能成组的couple
+#     """
+#     detectedGroups = dict()
+#     for t in range(len(X)):
+#         print(X[t]['trackid'])
+#         print(np.array(X[t]['F']))
+#         break
+#         for i in range(len(X[t]['couples'])):
+#             X[t]['couples'][i] = [[X[t]['couples'][i][j]] for j in range(2)]
+#             if X[t]['couples'][i] in Y[t]:
+#                 print(X[t]['myfeatures'][i][0])
+#                 print(X[t]['couples'][i])
+    # for t in range(len(X)):
+    #     for i in range(len)
+    #     # print(X[t]['couples'])
+    #     # break
+    #     # # print(Y[t])
+    # X[i] = {'trackid': allinformation[0], 'F': allinformation[1].tolist(), 'couples': allinformation[2].tolist(), 'myfeatures': allinformation[3].tolist(), 'detectedGroups': allinformation[4]}

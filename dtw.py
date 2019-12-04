@@ -23,18 +23,21 @@ def dtw(traj1, traj2):
     
     len_traj1 = traj1.shape[0]
     len_traj2 = traj2.shape[0]
-    n_feature = traj1.shape[1]  # traj1的position(x,y)，可能还有速度
+    n_feature = 2  # traj1的position(x,y)
 
     d = 0
-    for i in range(n_feature - 1):
+    for i in range(n_feature):
         traj1_fi = traj1[:, i + 1] # traj1除了frameid，一列一列提取出来
         traj2_fi = traj2[:, i + 1] # 同上
         # 标准化
         traj1_fi = normalization(traj1_fi)
         traj2_fi = normalization(traj2_fi)
-        
+        # print(i,"-----------------------------------------")
+        # print(traj1_fi)
+        # print(traj2_fi)
         # print(np.tile(traj1_fi.reshape(-1,1), (1,len_traj2)))
         # print(np.tile(traj2_fi, (len_traj1, 1)))
+        # print((np.tile(traj1_fi.reshape(-1,1), (1,len_traj2)) - np.tile(traj2_fi, (len_traj1, 1)))**2)
         d = d + (np.tile(traj1_fi.reshape(-1,1), (1,len_traj2)) - np.tile(traj2_fi, (len_traj1, 1)))**2
     
     d = d**0.5

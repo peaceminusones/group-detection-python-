@@ -33,6 +33,7 @@ def trainBCFW(X_train, Y_train):
     parameter['maxIter'] = 500      # maximum number of iterations
 
     detectedGroups = [X_train[i]['detectedGroups'] for i in range(len(X_train))]
+    # print(detectedGroups)
     
     # initialize variables
     n_it = parameter['maxIter']  # 迭代次数：500
@@ -49,10 +50,7 @@ def trainBCFW(X_train, Y_train):
     lambda_c = 1 / parameter['C']
     w_final = np.zeros((np.array(X_train[0]['myfeatures']).shape[1], 1)) # (2*特征数量,1)大小的零列向量
 
-    # i_number= [8,9,1,9,6,0]
-    # i_number= [7,9,6,9,7]
-    # i_number= [8,8]
-    for k in range(n_it):
+    for k in range(n_it): # 迭代500次
         # pick a block at random
         decimal = random.random() # 随机产生0-1之间的小数
         iblock = math.ceil(decimal*n) - 1
@@ -69,7 +67,7 @@ def trainBCFW(X_train, Y_train):
         
         # compute the loss at the new point
         delta,_,_ = loss.lossGM(Y_train[iblock], y_star)
-        l_s = (1/n)*delta
+        l_s = (1/lambda_c/n)*delta
         print("l_s: ",l_s)
         
         # find the new best value of the variable

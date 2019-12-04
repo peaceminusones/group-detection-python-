@@ -10,12 +10,6 @@ import flatten
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-# from numba.errors import NumbaDeprecationWarning, NumbaPendingDeprecationWarning, NumbaWarning
-# import warnings
-# warnings.simplefilter('ignore', category=NumbaWarning)
-# from numba import jit
-# @jit
-
 def parfor(information, i):
     """
     information = [y, couples, detectedGroups, H_temp, obj_Y_temp, n_cluster, X_train, Y_train, model_w]
@@ -29,6 +23,7 @@ def parfor(information, i):
     X_train = information[6]
     Y_train = information[7]
     model_w = information[8]
+    singles = information[9]
 
     # 把组成couples的两个分开，其中couple1和couple2里存的是他们在y中的index
     # 切片变量c，这样它就可以使用迭代变量来建立索引
@@ -36,8 +31,8 @@ def parfor(information, i):
     couple2 = couples[:, 1]
 
     # 先检查两个cluster
-    if not isClusterLegal(y[couple1[i]], y[couple2[i]], detectedGroups):
-        return [0, 0]
+    if [y[couple1[i]], y[couple2[i]]] not in X_train['couples']:
+        return [H_temp[i], y]
     
     Y_temp = list(np.zeros(n_cluster - 1))
     # 合并两个特定的cluster
@@ -50,31 +45,20 @@ def parfor(information, i):
     elif len(y[couple1[i]]) == 1 and len(y[couple2[i]]) == 1:
         Y_temp[0] = [y[couple1[i]], y[couple2[i]]]
     
-    # # 合并两个特定的cluster
-    # if len(y[couple1[i]]) > 1:
-    #     y[couple1[i]] = flatten.flatten(y[couple1[i]])
-    # # elif len(y[couple1[i]]) == 1:
-    # #     # print(y[couple1[i]][0])
-    # #     y[couple1[i]] = y[couple1[i]][0]
-    # if len(y[couple2[i]]) > 1:
-    #     y[couple2[i]] = flatten.flatten(y[couple2[i]])
-    # # elif len(y[couple2[i]]) == 1:
-    # #     # print(y[couple2[i]][0])
-    # #     y[couple2[i]] = y[couple2[i]][0]
-    # # Y_temp[0] = flatten.flatten([y[couple1[i]], y[couple2[i]]])
-    # Y_temp[0] = [y[couple1[i]], y[couple2[i]]]
-    # cluster counter
     k = 0
     for j in range(n_cluster):
         if j != couple1[i] and j != couple2[i]:
             k = k + 1
             Y_temp[k] = y[j]
     
-    delta,_,_ = loss.lossGM(Y_train, Y_temp)
-    # print("1:",Y_temp)
-    psi = fm.featureMap(X_train, Y_temp)
-    # print("2:",Y_temp)
-    H_temp[i] = (delta + np.dot(model_w.reshape(1,-1), psi))[0] 
+    delta,_,_ = loss.lossGM(Y_train, Y_temp+singles)
+    # groud truth
+    psi_g = fm.featureMap(X_train, Y_train)
+    # train
+    psi_t = fm.featureMap(X_train, Y_temp+singles)
+    # psi = fm.featureMap(X_train, Y_temp)
+    
+    H_temp[i] = (delta - np.dot(model_w.reshape(1,-1), (psi_g-psi_t)))[0] 
     
     obj_Y_temp[i] = Y_temp
     # print("3:",Y_temp)
@@ -93,12 +77,21 @@ def constraintFind(model_w, parameter, detectedGroups, X_train, Y_train):
         Y_train: 某个窗口（i）的训练数据(群组信息)
     """
     
-    # 这个时间窗口下的所有行人id
-    pedestrians = X_train['trackid']
-    # 对每个行人都创建一个cluster
-    y = [[pedestrians[i]] for i in range(len(pedestrians))]
-    # print(y)
     
+    # pedestrians = X_train['trackid']
+    # 这个时间窗口下的所有行人id
+    X_train_couples = X_train['couples']
+    # print(X_train_couples)
+    pedestrians = flatten.flatten_only(X_train_couples)
+    # 对每个行人都创建一个cluster
+    # print(pedestrians)
+    y = [[pedestrians[i]] for i in range(len(pedestrians))]
+    # print("1",X_train['singles'])
+    # print("2",y+X_train['singles'])
+    # print("3",X_train['trackid'])
+    # print("4",len(X_train['trackid']),len(y+X_train['singles']))
+    singles = X_train['singles']
+    print(y)
     # make sure the first iteration verifies the condition
     changed = True
     while changed:
@@ -108,11 +101,15 @@ def constraintFind(model_w, parameter, detectedGroups, X_train, Y_train):
 
         if n_cluster > 1:  # 如果cluster的数量大于1
             # 对与当前窗口下的所有行人组成的cluster，cluster组成的y，计算H(y) = max(Δ(yi, y) - W.TδΨi(y))
-            delta,_,_ = loss.lossGM(Y_train, y) # 求Δ(yi, y)
+            delta,_,_ = loss.lossGM(Y_train, y+singles) # 求Δ(yi, y)
             # print(delta)
-            psi = fm.featureMap(X_train, y)
+            
+            # groud truth
+            psi_g = fm.featureMap(X_train, Y_train)
+            # train
+            psi_t = fm.featureMap(X_train, y+singles)
             # print(psi)
-            H = (delta + np.dot(model_w.reshape(1,-1), psi))[0]   #np.mat(model_w).T*np.mat(psi).T
+            H = (delta - np.dot(model_w.reshape(1,-1), (psi_g-psi_t)))[0]   #np.mat(model_w).T*np.mat(psi).T
             
             # 现在这个窗口里所有可能的couple的数量和相应的index组合【即所有cluster两两组合】
             couples = group([i for i in range(n_cluster)])
@@ -124,10 +121,10 @@ def constraintFind(model_w, parameter, detectedGroups, X_train, Y_train):
             obj_Y_temp = dict()
 
             # 把接下来多线程里需要用到的信息放到一个list里，方便传参
-            information = [y, couples, detectedGroups, H_temp, obj_Y_temp, n_cluster, X_train, Y_train, model_w]
+            information = [y, couples, detectedGroups, H_temp, obj_Y_temp, n_cluster, X_train, Y_train, model_w, singles]
             
             v = []
-            p = multiprocessing.Pool(6) # 声明了6个线程数量
+            p = multiprocessing.Pool(8) # 声明了6个线程数量
             v = [p.apply_async(parfor, (information, i,)) for i in range(couples.shape[0])]
             p.close()
             p.join()
@@ -145,14 +142,19 @@ def constraintFind(model_w, parameter, detectedGroups, X_train, Y_train):
 
             H_max = max(list(H_temp))
             H_max_index = list(H_temp).index(H_max)
-            
+
+            # H_min = min(list(H_temp))
+            # H_min_index = list(H_temp).index(H_min)
+
             if H_max > H:
                 y = obj_Y_temp[H_max_index]
                 # print(y)
                 # loop until something has changed
                 changed = True
+            # break
             
-    return y
+            
+    return y + singles
 
 def group(track_id):
     return np.array(list(combinations(track_id, 2)))

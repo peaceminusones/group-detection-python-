@@ -1,7 +1,0 @@
-
-
-def HValue():
-
-
-
-    return

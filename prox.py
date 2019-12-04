@@ -3,6 +3,8 @@
 """
 import numpy as np
 import math
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def prox(traj1_f, traj2_f, traj1, traj2):
     interset_f = sorted(list(set(traj1_f) & set(traj2_f)))
