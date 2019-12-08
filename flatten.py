@@ -1,4 +1,7 @@
-def flatten(input_list):
+import copy
+
+def flatten(input_list_):
+    input_list = copy.deepcopy(input_list_)
     output_list = []
     while True:
         if input_list == []:
@@ -13,7 +16,8 @@ def flatten(input_list):
                 break
     return output_list
 
-def flatten_only(input_list):
+def flatten_only(input_list_):
+    input_list = copy.deepcopy(input_list_)
     output_list = []
     while True:
         if input_list == []:

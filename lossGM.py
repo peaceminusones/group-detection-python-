@@ -3,14 +3,9 @@
 """
 
 import numpy as np 
-import itertools
 import flatten
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-
-# from numba.errors import NumbaDeprecationWarning, NumbaPendingDeprecationWarning, NumbaWarning
-# import warnings
-# warnings.simplefilter('ignore', category=NumbaWarning)
 
 def lossGM(Y_train, ybar):
     """
@@ -21,7 +16,6 @@ def lossGM(Y_train, ybar):
     # 把当前窗口下已知的所有组y的行人id提取出来
     # group_pedestrian_id在y中的位置给了它一个唯一的标识符
     # Y_train是list类型，里面的元素，有的长度是1，有的长度是2、3、4……，所以group_pedestrian_id就是把Y_train里的元素展开成一个一维向量
-    # group_pedestrian_id = list(itertools.chain.from_iterable(Y_train))
     group_pedestrian_id = flatten.flatten(Y_train)
     # UF data structure -------------------------------------------------------------------------------
     # 最终作用是：相应位置上如果是同一个group，就赋予相同的值
@@ -36,8 +30,6 @@ def lossGM(Y_train, ybar):
     for i in range(len(Y_train)):
         for j in range(len(Y_train[i])):
             # find the index of the group_pedestrian_id and update its input in UF_ytrain
-            # print(Y_train[i][j])
-            # print(group_pedestrian_id)
             if isinstance(Y_train[i][j],list):
                 if Y_train[i][j][0] in group_pedestrian_id:
                     res = group_pedestrian_id.index(Y_train[i][j][0])

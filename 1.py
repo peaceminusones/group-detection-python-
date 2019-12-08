@@ -198,40 +198,78 @@ from math import *
 #     plt.plot(t,m,'-r')
 #     plt.pause(0.01)
 
-# -*- coding: utf-8 -*-
-import cv2
-import matplotlib.pyplot as plt
-import numpy as np
-from scipy.spatial import ConvexHull
-##########scipy 凸包################
-# points = np.random.rand(30, 2)
-points = np.array([[680.,489.],
- [675.32088886,501.85575219],
- [663.47296355,508.69615506],
- [650.        ,506.32050808],
- [641.20614758,495.84040287],
- [641.20614758,482.15959713],
- [650.        ,471.67949192],
- [663.47296355,469.30384494],
- [675.32088886,476.14424781],
- [680.        ,489.        ],
- [700.        ,455.        ],
- [695.32088886,467.85575219],
- [683.47296355,474.69615506],
- [670.        ,472.32050808],
- [661.20614758,461.84040287],
- [661.20614758,448.15959713],
- [670.        ,437.67949192],
- [683.47296355,435.30384494],
- [695.32088886,442.14424781],
- [700.        ,455.        ]])
-# print(points)
-hull = ConvexHull(points)
-# plt.plot(points[:,0], points[:,1], 'o')
-# hull.vertices 得到凸轮廓坐标的索引值，逆时针画
-hull1=hull.vertices.tolist()#要闭合必须再回到起点[0]
-hull1.append(hull1[0])
-plt.plot(points[hull1,0], points[hull1,1], 'r--',lw=2)
-# for i in range(len(hull1)-1):
-#     plt.text(points[hull1[i],0], points[hull1[i],1],str(i),fontsize=20)
-plt.show()
+# # -*- coding: utf-8 -*-
+# import cv2
+# import matplotlib.pyplot as plt
+# import numpy as np
+# from scipy.spatial import ConvexHull
+# ##########scipy 凸包################
+# # points = np.random.rand(30, 2)
+# points = np.array([[680.,489.],
+#  [675.32088886,501.85575219],
+#  [663.47296355,508.69615506],
+#  [650.        ,506.32050808],
+#  [641.20614758,495.84040287],
+#  [641.20614758,482.15959713],
+#  [650.        ,471.67949192],
+#  [663.47296355,469.30384494],
+#  [675.32088886,476.14424781],
+#  [680.        ,489.        ],
+#  [700.        ,455.        ],
+#  [695.32088886,467.85575219],
+#  [683.47296355,474.69615506],
+#  [670.        ,472.32050808],
+#  [661.20614758,461.84040287],
+#  [661.20614758,448.15959713],
+#  [670.        ,437.67949192],
+#  [683.47296355,435.30384494],
+#  [695.32088886,442.14424781],
+#  [700.        ,455.        ]])
+# # print(points)
+# hull = ConvexHull(points)
+# # plt.plot(points[:,0], points[:,1], 'o')
+# # hull.vertices 得到凸轮廓坐标的索引值，逆时针画
+# hull1=hull.vertices.tolist()#要闭合必须再回到起点[0]
+# hull1.append(hull1[0])
+# plt.plot(points[hull1,0], points[hull1,1], 'r--',lw=2)
+# # for i in range(len(hull1)-1):
+# #     plt.text(points[hull1[i],0], points[hull1[i],1],str(i),fontsize=20)
+# plt.show()
+# import flatten
+# from itertools import combinations 
+# def group(track_id):
+#     if len(track_id) > 1:
+#         track_id = flatten.flatten(track_id)
+#     track_id = sorted(track_id)
+#     return np.array(list(combinations(track_id, 2)))
+# merge = []
+# mycouples =group([[1],[2],[3]])
+# print(group([1]))
+# print([[mycouples[1][0]], [mycouples[1][1]]])
+# merge = merge + [mycouples[1][0], mycouples[1][1]]
+# print(merge)
+# merge = merge + [mycouples[2][0], mycouples[2][1]]
+# print(set([1,2,3]) == set([1,2,3]))
+# print(flatten.flatten([[1],[2]]))
+
+import multiprocessing as mp
+import itertools
+from functools import partial
+
+def job(z, r, item):
+    x = item
+    return x + z + r
+    
+def multicore(z):
+    x_y = list(range(10))
+    print(x_y)
+    r = 2
+    func = partial(job, z, r)
+    pool = mp.Pool()  # 无参数时，使用所有cpu核
+    # pool = mp.Pool(processes=3) # 有参数时，使用CPU核数量为3
+    res = pool.map(func, x_y)
+    return res
+
+if __name__ == '__main__':
+    res = multicore(1)
+    print(res)

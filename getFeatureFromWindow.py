@@ -9,7 +9,6 @@ from prox import prox
 from granger import granger
 from dtw import dtw
 from heatmap import heatmap
-from detectGroups import detectGroups
 from v_similar import v_similar
 from orientation import orientation
 import flatten
@@ -82,33 +81,24 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
         paths convergence |  feature_pc  |  heatmap
     """
     # 通过track_id先将两两行人形成初始化的组，对于数据集student003大小为：（1128，2）
-    couples, singles = group(path, track_id)
-    # couples = group(track_id)
+    couples = group(track_id)
+    print(couples.shape[0])
+    detectedGroup = group1(path, track_id)
+    print(detectedGroup.shape[0])
     
-    feature_pd = np.zeros((len(couples), 1))
-    feature_ts = np.zeros((len(couples), 1))
-    feature_vs = np.zeros((len(couples), 1))
-    feature_pc = np.zeros((len(couples), 1))
-    # feature_pd = np.zeros((couples.shape[0], 1))
-    # feature_ts = np.zeros((couples.shape[0], 1))
-    # feature_vs = np.zeros((couples.shape[0], 1))
-    # feature_pc = np.zeros((couples.shape[0], 1))
-
-    allHeatMaps = dict()
-    detectedGroup = dict()
+    feature_pd = np.zeros((couples.shape[0], 1))
+    feature_ts = np.zeros((couples.shape[0], 1))
+    feature_vs = np.zeros((couples.shape[0], 1))
+    feature_pc = np.zeros((couples.shape[0], 1))
     
-    # compute features for each couple  couples.shape[0]
-    for i in range(len(couples)):
+    # compute features for each couple  detectedGroup.shape[0]
+    for i in range(couples.shape[0]):
         # 提取出第i行的couple的两个轨迹，数据类型都是dataframe
-        traj1 = path[couples[i][0][0]]
-        traj2 = path[couples[i][1][0]]
+        traj1 = path[couples[i,0]]
+        traj2 = path[couples[i,1]]
         traj_1 = traj1.values
         traj_2 = traj2.values
-        # print(traj_1)
-        # print(traj_2)
-        # print("id:",couples[i,0],couples[i,1])
-        # print("len:",traj_1.shape[0],traj_2.shape[0])
-        # print(traj_1,traj_2)
+        
         """
             1) compute proxemics: physical distance | feature_pd 
         """
@@ -156,19 +146,10 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
     myfeatures = np.concatenate((feature_pd, feature_ts),axis = 1)
     myfeatures = np.concatenate((myfeatures, feature_vs),axis = 1)
     myfeatures = np.concatenate((myfeatures, feature_pc),axis = 1)
-    
-    """
-        HEAT MAPS COARSE GROUP DETECTION -------------------------------------------------------------------------------
-    """
-    detectedGroup[0] = couples
 
-    if model_par.useHMGroupDetection:
-        detectedGroup = detectGroups(couples, allHeatMaps)
-    
-    return [track_id, F, couples, singles, myfeatures, detectedGroup]
+    return [track_id, F, couples, myfeatures, detectedGroup]
 
-
-def group(path, track_id):
+def group1(path, track_id):
     couples = np.array(list(combinations(track_id, 2)))
     # dist = []
     friends = []
@@ -177,25 +158,14 @@ def group(path, track_id):
         [frameid1,px1,py1,vx1,vy1] = path[c[1]].iloc[-1].values
         d = math.pow(math.pow(px0 - px1 ,2) + math.pow(py0 - py1 ,2), 0.5)
         # dist.append(d)
-        if d > 5:  # 换数据集的话需要改！！！！！！！！！！！！！！！！！！！
+        if d > 12:  # 换数据集的话需要改！！！！！！！！！！！！！！！！！！！
             continue
-        friends.append([[c[0]],[c[1]]])
-        # print(path[c[0]])
-        # print(px0,py0,vx0,vy0)
-        # print(path[c[1]])
-        # print(px1,py1,vx1,vy1)
-    # print(sorted(dist))
-    # print(track_id)
-    # print(couples)
-    # print(couples.shape[0])
-    # friends = np.array(friends)
-    # print(friends)
-    # print(friends.shape[0])
-    a = flatten.flatten(friends)
-    b = track_id
-    singles = list(set(b).difference(set(a)))
-    singles = [[singles[i]] for i in range(len(singles))]
-    return friends, singles
+        friends.append([c[0],c[1]])
+    # a = flatten.flatten(friends)
+    # b = track_id
+    # singles = list(set(b).difference(set(a)))
+    # singles = [[singles[i]] for i in range(len(singles))]
+    return np.array(friends)
 
-# def group(track_id):
-#     return np.array(list(combinations(track_id, 2)))
+def group(track_id):
+    return np.array(list(combinations(track_id, 2)))

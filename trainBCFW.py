@@ -30,9 +30,9 @@ def trainBCFW(X_train, Y_train):
     # initial parameter
     parameter = dict()
     parameter['C'] = 10             # regularization parameter
-    parameter['maxIter'] = 500      # maximum number of iterations
+    parameter['maxIter'] = 400      # maximum number of iterations
 
-    detectedGroups = [X_train[i]['detectedGroups'] for i in range(len(X_train))]
+    # detectedGroups = [X_train[i]['detectedGroups'] for i in range(len(X_train))]
     # print(detectedGroups)
     
     # initialize variables
@@ -42,10 +42,6 @@ def trainBCFW(X_train, Y_train):
     w_i = np.zeros((np.array(X_train[0]['myfeatures']).shape[1], n))
     l = 0
     l_i = np.zeros(n)
-
-    # 开启一个画图的窗口
-    # plt.ion() 
-    # plt.figure(1)
 
     lambda_c = 1 / parameter['C']
     w_final = np.zeros((np.array(X_train[0]['myfeatures']).shape[1], 1)) # (2*特征数量,1)大小的零列向量
@@ -62,20 +58,20 @@ def trainBCFW(X_train, Y_train):
 
         # find the most violated
         model_w = w
-        y_star = cf.constraintFind(model_w, parameter, detectedGroups[iblock], X_train[iblock], Y_train[iblock])
+        y_star = cf.constraintFind(model_w, parameter, X_train[iblock], Y_train[iblock])
         print("y_star: ",y_star)
-        
-        # compute the loss at the new point
-        delta,_,_ = loss.lossGM(Y_train[iblock], y_star)
-        l_s = (1/lambda_c/n)*delta
-        print("l_s: ",l_s)
         
         # find the new best value of the variable
         w_s = (1/lambda_c/n)*(np.array(fm.featureMap(X_train[iblock], Y_train[iblock])) - np.array(fm.featureMap(X_train[iblock], y_star)))
         print("w_s: ",w_s)
 
+        # compute the loss at the new point
+        delta,_,_ = loss.lossGM(Y_train[iblock], y_star)
+        l_s = (1/lambda_c/n)*delta
+        print("l_s: ",l_s)
+        
         # compute the step size
-        step_size = ((lambda_c * np.dot(w_i[:,iblock]-w_s, w) + l_s - l_i[iblock] ) / lambda_c / np.dot(w_i[:,iblock]-w_s, w_i[:,iblock]-w_s))[0]
+        step_size = ((lambda_c*np.dot(w_i[:,iblock]-w_s, w) + l_s - l_i[iblock] ) / (lambda_c*np.dot(w_i[:,iblock]-w_s, w_i[:,iblock]-w_s)))[0]
         if math.isnan(step_size):
             continue
         step_size = [step_size, 0][0 > step_size]
@@ -83,20 +79,20 @@ def trainBCFW(X_train, Y_train):
         print("step_size: ",step_size)
 
         # evaluate w_i and l_i
-        l_i_new = (1 - step_size)*l_i[iblock] + step_size*l_s
         w_i_new = (1 - step_size)*w_i[:, iblock] + step_size*w_s
+        l_i_new = (1 - step_size)*l_i[iblock] + step_size*l_s
         # print("l_i_new: ",l_i_new)
         # print("w_i_new: ",w_i_new)
 
         # update w and l
-        l = l + l_i_new - l_i[iblock]
         w = w + w_i_new.reshape(-1,1) - w_i[:, iblock].reshape(-1,1)  # !列向量相减
-        print("l: ",l)
+        l = l + l_i_new - l_i[iblock]
         print("w: ",w)
+        print("l: ",l)
 
         # update w_i and l_i
-        l_i[iblock] = l_i_new
         w_i[:, iblock] = w_i_new
+        l_i[iblock] = l_i_new
         # print(l_i)
         # print(w_i)
 
@@ -104,13 +100,6 @@ def trainBCFW(X_train, Y_train):
         print('w = \n'+ str(w))
 
         w_final = np.hstack((w_final, w))
-        # print('w_final =')
-        # print(w_final)
-        
-        # plot figure
-        # plt.plot(w_final.T)        # 画出当前 ax 列表和 ay 列表中的值的图形
-        # plt.draw()
-        # time.sleep(1)
 
         # break
         
@@ -119,6 +108,5 @@ def trainBCFW(X_train, Y_train):
     plt.close()
     
     model_w = w
-    # print(model_w)
     
     return model_w
