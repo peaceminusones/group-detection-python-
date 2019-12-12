@@ -23,7 +23,7 @@ def showCluster(myF, Y_test, Y_pred, model_par, video_par, dataDirectory):
 
     # # -------------------------------------
     plt.figure(figsize=(14,8))
-    for j in range(model_par.testingSetSize):
+    for j in range(model_par.testingSetSize + model_par.trainingSetSize):
 
         while (index_end <= myF.shape[0]) and (myF.iloc[index_end, 0] <= (myF.iloc[index_start, 0] + model_par.window_size * video_par['frame_rate'])):
             index_end = index_end + 1

@@ -5,9 +5,10 @@ import numpy as np
 from itertools import combinations 
 import flatten
 import os
+import numba as nb
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 # import numba as nb
-# @numba.jit
+# @nb.jit
 def featureMap(X_train, y):
     """
     参数：
@@ -20,7 +21,7 @@ def featureMap(X_train, y):
         # 当前窗口下的cluster再进行两两成组，如果是[1]，则group为[]，即空
         mycouples = group(y[i])
         # 对每个cluster计算
-        if len(mycouples) > 0:
+        if(len(mycouples) > 0):
             for j in range(len(mycouples)):
                 index = X_train['couples'].index([mycouples[j][0], mycouples[j][1]])
                 psi = psi + X_train['myfeatures'][index, :]

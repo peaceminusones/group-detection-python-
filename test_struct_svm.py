@@ -7,7 +7,7 @@ import multiprocessing
 import featureMap as fm
 import lossGM as loss
 import flatten
-
+from functools import partial
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
@@ -72,7 +72,7 @@ def test_struct_svm(X_test, Y_test, w):
             obj_score = np.dot(w.T, psi)[0]
             # try all possible joinings...
             couples = group([j for j in range(n_clusters)])
-            # couples = deleteNoCouples(couples, cluster, X_test[i]['detectedGroups'])
+            couples = deleteNoCouples(couples, cluster, X_test[i]['detectedGroups'])
             """
                 evaluate them all using a parallel for:
                     as a matter of fact the iterations can be written as indipendent from previous results
@@ -82,14 +82,14 @@ def test_struct_svm(X_test, Y_test, w):
             obj_score_temp = np.zeros(couples.shape[0])
             obj_cluster_temp = dict()
 
+            information = [i, cluster, X_test, couples, w]
             func = partial(parfor,information)
-            p = multiprocessing.Pool(6) # 声明了6个线程数量
+            p = multiprocessing.Pool(8) # 声明了6个线程数量
             iteration = [i for i in range(couples.shape[0])]
             v = p.map(func, iteration)
             p.close()
             p.join()
             
-            # information = [i, cluster, X_test, couples, w]
             # p = multiprocessing.Pool(6) # 声明了6个线程数量
             # v = [p.apply_async(parfor, (information, j,)) for j in range(couples.shape[0])]
             # p.close()
@@ -100,7 +100,7 @@ def test_struct_svm(X_test, Y_test, w):
                 obj_score_temp[j] = score_temp_and_obj_cluster[j][0]
                 obj_cluster_temp[j] = score_temp_and_obj_cluster[j][1]
             
-            obj_score_temp_max = max(list(obj_score_temp))
+            obj_score_temp_max = np.nanmax(obj_score_temp)
             max_index = list(obj_score_temp).index(obj_score_temp_max)
 
             if obj_score_temp_max > obj_score:

@@ -1,7 +1,8 @@
 import numpy as np 
 import random
 import math
-import constraintFind as cf
+from constraintFind import constraintFind
+from constraint import constraint
 import lossGM as loss
 import featureMap as fm
 import matplotlib.pyplot as plt
@@ -30,10 +31,7 @@ def trainBCFW(X_train, Y_train):
     # initial parameter
     parameter = dict()
     parameter['C'] = 10             # regularization parameter
-    parameter['maxIter'] = 400      # maximum number of iterations
-
-    # detectedGroups = [X_train[i]['detectedGroups'] for i in range(len(X_train))]
-    # print(detectedGroups)
+    parameter['maxIter'] = 350      # maximum number of iterations
     
     # initialize variables
     n_it = parameter['maxIter']  # 迭代次数：500
@@ -55,10 +53,14 @@ def trainBCFW(X_train, Y_train):
         # iblock = i_number[k]
         print('---------------------------------------')
         print('k = '+ str(k) +', iblock = ' + str(iblock))
-
+        
+        start = time.clock()
         # find the most violated
         model_w = w
-        y_star = cf.constraintFind(model_w, parameter, X_train[iblock], Y_train[iblock])
+        if np.all(model_w == 0):
+            y_star = constraintFind(model_w, X_train[iblock], Y_train[iblock])
+        else:
+            y_star = constraint(model_w, X_train[iblock], Y_train[iblock])
         print("y_star: ",y_star)
         
         # find the new best value of the variable
@@ -101,6 +103,8 @@ def trainBCFW(X_train, Y_train):
 
         w_final = np.hstack((w_final, w))
 
+        end = time.clock()
+        print("time:",end-start)
         # break
         
     plt.plot(w_final.T)

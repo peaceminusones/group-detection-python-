@@ -4,10 +4,12 @@ from itertools import combinations
 import lossGM as loss
 import featureMap as fm
 import multiprocessing
+from concurrent.futures import ProcessPoolExecutor
 import flatten
 import os
 import copy
 from functools import partial
+import time
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def parfor(information, i):
@@ -48,17 +50,15 @@ def parfor(information, i):
     # train
     psi_t = fm.featureMap(X_train, Y_temp)
 
-    H_temp = (delta - np.dot(model_w.reshape(1,-1), (psi_g-psi_t)))[0] 
+    H_temp = (delta + np.dot(model_w.reshape(1,-1), psi_t))[0] 
 
     return [H_temp, Y_temp]
 
-def constraintFind(model_w, parameter, X_train, Y_train):
+def constraintFind(model_w, X_train, Y_train):
     # INITIALIZE CLUSTERS FOR GREEDY APPROXIMATION 贪心算法初始化聚类
     """
     参数：
         model_w: 权重，8×1的列向量
-        parameter: parameter['C'] = 10  # regularization parameter
-                   parameter['maxIter'] = 300      # maximum number of iterations
         X_train: 某个窗口（i）的训练数据
         Y_train: 某个窗口（i）的训练数据(群组信息)
     """
@@ -74,8 +74,8 @@ def constraintFind(model_w, parameter, X_train, Y_train):
         changed = False
         # print(y)
         n_cluster = len(y) # 当前窗口下cluster的数量，其中y表示“对每个行人都创建一个cluster”
-
         if n_cluster > 1:  # 如果cluster的数量大于1
+            
             # 对与当前窗口下的所有行人组成的cluster，cluster组成的y，计算H(y) = max(Δ(yi, y) - W.TδΨi(y))
             delta,_,_ = loss.lossGM(Y_train, y) # 求Δ(yi, y)
             # print(delta)
@@ -85,11 +85,13 @@ def constraintFind(model_w, parameter, X_train, Y_train):
             # train
             psi_t = fm.featureMap(X_train, y)
             # print(psi)
-            H = (delta - np.dot(model_w.reshape(1,-1), (psi_g-psi_t)))[0]   #np.mat(model_w).T*np.mat(psi).T
+            H = (delta + np.dot(model_w.reshape(1,-1), psi_t))[0]   #np.mat(model_w).T*np.mat(psi).T
             
             # 现在这个窗口里所有可能的couple的数量和相应的index组合【即所有cluster两两组合】
             couples = group([i for i in range(n_cluster)])
+            # print(couples.shape[0])
             couples = deleteNoCouples(couples, y, X_train['detectedGroups'])
+            # print(couples.shape[0])
             # 对于所有可能的clusters，我们必须evaluate H(Y)
             # 用并行做：迭代可以写成与以前的结果无关的形式
             # 每个迭代的集群保存在obj_Y_temp中，每个迭代的结果(分数)保存在H_temp中
@@ -99,15 +101,17 @@ def constraintFind(model_w, parameter, X_train, Y_train):
 
             # 把接下来多线程里需要用到的信息放到一个list里，方便传参
             information = [y, couples, n_cluster, X_train, Y_train, model_w]
-
             func = partial(parfor,information)
-            p = multiprocessing.Pool(6) # 声明了6个线程数量
+            p = multiprocessing.Pool(8) # 声明了6个线程数量
             iteration = [i for i in range(couples.shape[0])]
             v = p.map(func, iteration)
             p.close()
             p.join()
             
-            # v = [parfor(information, i) for i in range(couples.shape[0])]
+            # func = partial(parfor,information)
+            # p = ProcessPoolExecutor(max_workers=10) # 声明了6个进程数量
+            # v = p.map(func, range(couples.shape[0]))
+            # p.shutdown(wait=True)
 
             H_temp_and_obj_Y_temp = [r for r in v]
             for i in range(len(H_temp_and_obj_Y_temp)):
@@ -117,8 +121,9 @@ def constraintFind(model_w, parameter, X_train, Y_train):
             # for i in range(len(v)):
             #     H_temp[i] = v[i][0]
             #     obj_Y_temp[i] = v[i][1]
-
-            H_max = max(list(H_temp))
+            
+            # H_max = max(list(H_temp))
+            H_max = np.nanmax(H_temp)
             H_max_index = list(H_temp).index(H_max)
 
             if H_max > H:

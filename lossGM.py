@@ -49,7 +49,7 @@ def lossGM(Y_train, ybar):
                 if ybar[i][j] in group_pedestrian_id:
                     res = group_pedestrian_id.index(ybar[i][j])
                     UF_ybar[res] = i + 1
-    connected_ytrain = np.unique(np.array(UF_ytrain))[1:]
+    connected_ytrain = np.unique(np.array(UF_ytrain))[1:] #np.unique该函数是去除数组中的重复数字，并进行排序之后输出
     connected_ybar = np.unique(np.array(UF_ybar))[1:]
     # --------------------------------------------------------------------------------------------------
     
@@ -106,3 +106,8 @@ def enumerateIndex(target, a):
         if nums == target:
             b.append(index)
     return b
+
+# if __name__ == "__main__":
+#     Y_train = [[[142], [188], [432]], [[183], [184], [417]], [[362], [363]], [179], [181], [182], [185], [186], [187], [189], [190], [191], [192], [194], [364], [365], [366], [400], [418]]
+#     y_bar = [[142], [179], [[362], [363]], [364], [432], [181], [182], [[184], [183]], [185], [186], [187], [[417], [418]], [188], [[189], [190]], [365], [[192], [191]], [366], [194], [400]]
+#     print(lossGM(Y_train, y_bar))

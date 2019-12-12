@@ -15,10 +15,10 @@ def prox(traj1_f, traj2_f, traj1, traj2):
         inter_traj2 = []
         for i in range(len(traj1_f)):
             if traj1_f[i] in interset_f:
-                inter_traj1.append(list(traj1[i, 1:]))
+                inter_traj1.append(list(traj1[i, 1:3]))
         for i in range(len(traj2_f)):
             if traj2_f[i] in interset_f:
-                inter_traj2.append(list(traj2[i, 1:]))
+                inter_traj2.append(list(traj2[i, 1:3]))
 
         inter_t1 = np.array(inter_traj1)
         inter_t2 = np.array(inter_traj2)
@@ -36,7 +36,7 @@ def prox(traj1_f, traj2_f, traj1, traj2):
         #     file_obj.write("inter_t1:\n"+str(inter_t1)+"\n")
         #     file_obj.write("inter_t2:\n"+str(inter_t2)+"\n")
         #     file_obj.write("similar:\n"+str(similar)+"\n")
-    return similar
+    return 1 - similar
 
 def square(list_x):
     s = [[list_x[i][j] ** 2 for j in range(len(list_x[i]))] for i in range(len(list_x))]

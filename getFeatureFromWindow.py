@@ -11,6 +11,7 @@ from dtw import dtw
 from heatmap import heatmap
 from v_similar import v_similar
 from orientation import orientation
+from staticDistance import staticDistance
 import flatten
 
 def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
@@ -21,7 +22,7 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
     F = myF.values
     track_id = sorted(set(F[:,1].astype(int)))
 
-    # 计算这10s内每个人在场景中待了多久（多少个frame），如果时间过短（小于4），从当前考虑的数据中删除
+    # 计算这10s内每个人在场景中待了多久（多少个frame），如果时间过短（小于3），从当前考虑的数据中删除
     for i in range(len(track_id)):
         if len(myF[myF[1] == track_id[i]]) < 4:
             # 筛选出要删除的数据
@@ -52,24 +53,23 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
         choosebytrackid = myF[myF[1] == t]
         path[t] = choosebytrackid.iloc[:,[0,2,4]]
 
-    # 如果include_derivatives=true，则提取速度特征
-    if model_par.include_derivatives:
-        for t in track_id:
-            trajectory = path[t].values
-            trajectoryPlusVeloc = []
-            for i in range(trajectory.shape[0]):
-                if i == 0:
-                    # 每条轨迹的第一个位置，由于没有之前的位置，所以速度置为nan
-                    v_nan = np.insert(trajectory[0], len(trajectory[0]), values=[np.nan, np.nan])
-                    trajectoryPlusVeloc.append(list(v_nan))
-                else:
-                    # 计算之后所有位置的速度(x方向和y方向)
-                    vx = trajectory[i, 1] - trajectory[i-1, 1]
-                    vy = trajectory[i, 2] - trajectory[i - 1, 2]
-                    velocity = np.insert(trajectory[i], len(trajectory[i]), values=[vx, vy])
-                    trajectoryPlusVeloc.append(list(velocity))
-            # 把含有速度特征的轨迹信息替换到path变量中，其中trajectoryPlusVeloc是array类型，又转换为dataframe类型再替换
-            path[t] = pd.DataFrame(np.delete(trajectoryPlusVeloc, 0, 0))  # 删除第一行，因为如果有速度特征的话，第一行的速度值为Nan
+    # 提取速度特征
+    for t in track_id:
+        trajectory = path[t].values
+        trajectoryPlusVeloc = []
+        for i in range(trajectory.shape[0]):
+            if i == 0:
+                # 每条轨迹的第一个位置，由于没有之前的位置，所以速度置为nan
+                v_nan = np.insert(trajectory[0], len(trajectory[0]), values=[np.nan, np.nan])
+                trajectoryPlusVeloc.append(list(v_nan))
+            else:
+                # 计算之后所有位置的速度(x方向和y方向)
+                vx = trajectory[i, 1] - trajectory[i-1, 1]
+                vy = trajectory[i, 2] - trajectory[i - 1, 2]
+                velocity = np.insert(trajectory[i], len(trajectory[i]), values=[vx, vy])
+                trajectoryPlusVeloc.append(list(velocity))
+        # 把含有速度特征的轨迹信息替换到path变量中，其中trajectoryPlusVeloc是array类型，又转换为dataframe类型再替换
+        path[t] = pd.DataFrame(np.delete(trajectoryPlusVeloc, 0, 0))  # 删除第一行，因为如果有速度特征的话，第一行的速度值为Nan
     
     # print(path)
     """
@@ -83,15 +83,13 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
     # 通过track_id先将两两行人形成初始化的组，对于数据集student003大小为：（1128，2）
     couples = group(track_id)
     print(couples.shape[0])
-    detectedGroup = group1(path, track_id)
-    print(detectedGroup.shape[0])
     
     feature_pd = np.zeros((couples.shape[0], 1))
     feature_ts = np.zeros((couples.shape[0], 1))
     feature_vs = np.zeros((couples.shape[0], 1))
     feature_pc = np.zeros((couples.shape[0], 1))
     
-    # compute features for each couple  detectedGroup.shape[0]
+    # compute features for each couple  couples.shape[0]
     for i in range(couples.shape[0]):
         # 提取出第i行的couple的两个轨迹，数据类型都是dataframe
         traj1 = path[couples[i,0]]
@@ -136,12 +134,15 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
         #     feature_pc[i] = 0
         if model_par.features[3] == 1:
             feature_pc[i] = orientation(traj_1[:, 0:5], traj_2[:, 0:5])
-        
         # print(feature_pd[i])
         # print(feature_ts[i])
         # print(feature_vs[i])
         # print(feature_pc[i])
+        # print(feature_sd[i])
     
+    detectedGroup = group1(path, track_id)
+    print(detectedGroup.shape[0])
+
     # 把四个特征列向量组合成一个n*4的二维矩阵[feature_pd, feature_ts, feature_mc, feature_pc]
     myfeatures = np.concatenate((feature_pd, feature_ts),axis = 1)
     myfeatures = np.concatenate((myfeatures, feature_vs),axis = 1)
@@ -149,22 +150,26 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
 
     return [track_id, F, couples, myfeatures, detectedGroup]
 
+# def group1(couples, distance, track_id):
+#     friends = []
+#     for i in range(couples.shape[0]):
+#         if distance[i] > 10:  # 换数据集的话需要改！！！！！！！！！！！！！！！！！！！
+#             continue
+#         friends.append([couples[i,0],couples[i,1]])
+    
+#     return np.array(friends)
+
 def group1(path, track_id):
     couples = np.array(list(combinations(track_id, 2)))
-    # dist = []
     friends = []
     for c in couples:
         [frameid0,px0,py0,vx0,vy0] = path[c[0]].iloc[-1].values
         [frameid1,px1,py1,vx1,vy1] = path[c[1]].iloc[-1].values
         d = math.pow(math.pow(px0 - px1 ,2) + math.pow(py0 - py1 ,2), 0.5)
-        # dist.append(d)
-        if d > 12:  # 换数据集的话需要改！！！！！！！！！！！！！！！！！！！
+        if d > 10:  # 换数据集的话需要改！！！！！！！！！！！！！！！！！！！
             continue
         friends.append([c[0],c[1]])
-    # a = flatten.flatten(friends)
-    # b = track_id
-    # singles = list(set(b).difference(set(a)))
-    # singles = [[singles[i]] for i in range(len(singles))]
+
     return np.array(friends)
 
 def group(track_id):
