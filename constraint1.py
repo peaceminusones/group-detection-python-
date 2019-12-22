@@ -7,7 +7,7 @@ import copy
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-def constraint(model_w, X_train, Y_train):
+def constraint1(model_w, X_train, Y_train):
     # INITIALIZE CLUSTERS FOR GREEDY APPROXIMATION 贪心算法初始化聚类
     """
     参数：
@@ -30,10 +30,10 @@ def constraint(model_w, X_train, Y_train):
     while changed and n_cluster > 1:
         n_cluster = len(y)
         # 对与当前窗口下的所有行人组成的cluster，cluster组成的y，计算H(y) = max(Δ(yi, y) + W.T*Ψi(y))
-        # delta,_,_ = loss.lossGM(Y_train, y) # 求Δ(yi, y)
+        delta,_,_ = loss.lossGM(Y_train, y) # 求Δ(yi, y)
         # psi_g = fm.featureMap(X_train, y)  # 求φ(xi, y_train)
         psi = fm.featureMap(X_train, y)  # 求φ(xi, y)
-        H = 1 + np.dot(model_w.reshape(1,-1), psi)[0]  # 求H(y)
+        H = (delta + np.dot(model_w.reshape(1,-1), psi))[0]  # 求H(y)
         
         # 得到关系匹配网络中，当前值最大的couples: max_couples
         max_score = np.nanmax(score_network)
@@ -81,10 +81,10 @@ def constraint(model_w, X_train, Y_train):
                     Y_temp[k] = y[j]
             
         # 对与当前窗口下的所有行人组成的cluster，cluster组成的y，计算H(y) = W.T*φi(y)
-        # delta,_,_ = loss.lossGM(Y_train, Y_temp) # 求Δ(yi, y)
+        delta,_,_ = loss.lossGM(Y_train, Y_temp) # 求Δ(yi, y)
         # psi_g = fm.featureMap(X_train, y)  # 求φ(xi, y_train)
         psi = fm.featureMap(X_train, Y_temp)  # 求φ(xi, y)
-        H_new = 1 + np.dot(model_w.reshape(1,-1), psi)[0]  # 求H(y)
+        H_new = (delta + np.dot(model_w.reshape(1,-1), psi))[0]  # 求H(y)
         if H_new >= H:
             y = Y_temp
             changed = True

@@ -8,6 +8,7 @@ from itertools import combinations
 from prox import prox
 from granger import granger
 from dtw import dtw
+from Hausdorff import Hausdorff
 from heatmap import heatmap
 from v_similar import v_similar
 from orientation import orientation
@@ -16,15 +17,21 @@ import flatten
 
 def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
     # 需要把10s内所有帧的数组提出来
-    myF = myF.iloc[index_start:index_end, :]
+    myF = myF.iloc[0:index_end, :]
+    fid= myF.iloc[-1, 0]
+    myidF = myF[myF[0] == fid]
+    myF = myF[myF[0] <= fid]
+    F = myF.values
 
     # 将10s内所有帧的不重复的track_id提取出来，表示有多少个人
-    F = myF.values
-    track_id = sorted(set(F[:,1].astype(int)))
-
+    idF = myidF.values
+    track_id = sorted(set(idF[:,1].astype(int)))
+    # print(track_id)
     # 计算这10s内每个人在场景中待了多久（多少个frame），如果时间过短（小于3），从当前考虑的数据中删除
+    deleteid = []
     for i in range(len(track_id)):
         if len(myF[myF[1] == track_id[i]]) < 4:
+            deleteid.append(track_id[i])
             # 筛选出要删除的数据
             choosebytrackid = myF[myF[1] == track_id[i]]
             # 得到每行的行号，然后逐个删除
@@ -34,8 +41,10 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
     # 重新索引，并更新track_id
     myF = myF.reset_index(drop=True)
     # F = myF.values
-    track_id = sorted(set(myF.values[:, 1].astype(int)))
+    # track_id = sorted(set(myF.values[:, 1].astype(int)))
+    track_id = sorted(list(set(track_id) - set(deleteid)))
     # print(track_id)
+    # print(len(track_id))
     # print(myF)
     """
         PERSONAL FEATURES -----------------------------------------------------------------------------
@@ -108,9 +117,11 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
             2) compute MD-DTW: trajectory shape  |  feature_ts
         """
         if model_par.features[1] == 1:
-            dist, k= dtw(traj_1, traj_2)
-            # 由于距离很大程度上取决于被比较的点的数量，所以它必须被标准化
-            feature_ts[i] = dist/k
+            # print(couples[i])
+            feature_ts[i] = Hausdorff(traj_1, traj_2)
+            # dist, k = dtw(traj_1, traj_2)
+            # feature_ts[i] = dist/k
+            # print(feature_ts[i])
         """
             3) compute : velocity similarity  |  feature_vs
         """
@@ -140,37 +151,38 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
         # print(feature_pc[i])
         # print(feature_sd[i])
     
-    detectedGroup = group1(path, track_id)
-    print(detectedGroup.shape[0])
+    detectedGroup = couples
+    # detectedGroup = group1(couples, feature_pd, track_id)
+    # print(detectedGroup.shape[0])
 
     # 把四个特征列向量组合成一个n*4的二维矩阵[feature_pd, feature_ts, feature_mc, feature_pc]
     myfeatures = np.concatenate((feature_pd, feature_ts),axis = 1)
     myfeatures = np.concatenate((myfeatures, feature_vs),axis = 1)
     myfeatures = np.concatenate((myfeatures, feature_pc),axis = 1)
-
+    print(myfeatures.shape[0])
     return [track_id, F, couples, myfeatures, detectedGroup]
 
-# def group1(couples, distance, track_id):
-#     friends = []
-#     for i in range(couples.shape[0]):
-#         if distance[i] > 10:  # 换数据集的话需要改！！！！！！！！！！！！！！！！！！！
-#             continue
-#         friends.append([couples[i,0],couples[i,1]])
-    
-#     return np.array(friends)
-
-def group1(path, track_id):
-    couples = np.array(list(combinations(track_id, 2)))
+def group1(couples, distance, track_id):
     friends = []
-    for c in couples:
-        [frameid0,px0,py0,vx0,vy0] = path[c[0]].iloc[-1].values
-        [frameid1,px1,py1,vx1,vy1] = path[c[1]].iloc[-1].values
-        d = math.pow(math.pow(px0 - px1 ,2) + math.pow(py0 - py1 ,2), 0.5)
-        if d > 10:  # 换数据集的话需要改！！！！！！！！！！！！！！！！！！！
+    for i in range(couples.shape[0]):
+        if distance[i] > 5e-7:  # 换数据集的话需要改！！！！！！！！！！！！！！！！！！！
             continue
-        friends.append([c[0],c[1]])
-
+        friends.append([couples[i,0],couples[i,1]])
+    
     return np.array(friends)
+
+# def group1(path, track_id):
+#     couples = np.array(list(combinations(track_id, 2)))
+#     friends = []
+#     for c in couples:
+#         [frameid0,px0,py0,vx0,vy0] = path[c[0]].iloc[-1].values
+#         [frameid1,px1,py1,vx1,vy1] = path[c[1]].iloc[-1].values
+#         d = math.pow(math.pow(px0 - px1 ,2) + math.pow(py0 - py1 ,2), 0.5)
+#         if d > 10:  # 换数据集的话需要改！！！！！！！！！！！！！！！！！！！
+#             continue
+#         friends.append([c[0],c[1]])
+
+#     return np.array(friends)
 
 def group(track_id):
     return np.array(list(combinations(track_id, 2)))

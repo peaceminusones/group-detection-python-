@@ -3,6 +3,7 @@ import random
 import math
 from constraintFind import constraintFind
 from constraint import constraint
+from constraint1 import constraint1
 import lossGM as loss
 import featureMap as fm
 import matplotlib.pyplot as plt
@@ -17,7 +18,6 @@ def trainBCFW(X_train, Y_train):
                          F: 当前窗口内（10s内）所有帧的所有行人数据（位置、frameid、trackid、速度）
                    couples: 当前窗口内（10s内）所有可能的组（即两两组合）
                 myfeatures: 当前窗口内（10s内）所有可能成组的两两轨迹之间形成的特征，包含四个特征【物理距离，相互影响程度，轨迹形状相似性，目标重合度】
-            detectedGroups: 即couples
         Y_train--------------------------------------------------------------------------------
             从文件中读出的当前窗口内的正确的成组信息
     """
@@ -28,20 +28,15 @@ def trainBCFW(X_train, Y_train):
     if len(X_train) == 0:
         return model_w
 
-    # initial parameter
-    parameter = dict()
-    parameter['C'] = 10             # regularization parameter
-    parameter['maxIter'] = 350      # maximum number of iterations
-    
     # initialize variables
-    n_it = parameter['maxIter']  # 迭代次数：500
+    n_it = 300  # 迭代次数：500 # maximum number of iterations
     n = len(X_train)
     w = np.zeros((np.array(X_train[0]['myfeatures']).shape[1], 1))
     w_i = np.zeros((np.array(X_train[0]['myfeatures']).shape[1], n))
     l = 0
     l_i = np.zeros(n)
 
-    lambda_c = 1 / parameter['C']
+    lambda_c = 1 / 10   # regularization parameter
     w_final = np.zeros((np.array(X_train[0]['myfeatures']).shape[1], 1)) # (2*特征数量,1)大小的零列向量
 
     for k in range(n_it): # 迭代500次
@@ -50,7 +45,7 @@ def trainBCFW(X_train, Y_train):
         iblock = math.ceil(decimal*n) - 1
         # if k > len(i_number)-1:
         #     break
-        # iblock = i_number[k]
+        # iblock = number[k]
         print('---------------------------------------')
         print('k = '+ str(k) +', iblock = ' + str(iblock))
         
@@ -58,9 +53,11 @@ def trainBCFW(X_train, Y_train):
         # find the most violated
         model_w = w
         if np.all(model_w == 0):
+            iblock = 1
             y_star = constraintFind(model_w, X_train[iblock], Y_train[iblock])
         else:
-            y_star = constraint(model_w, X_train[iblock], Y_train[iblock])
+            y_star = constraint1(model_w, X_train[iblock], Y_train[iblock])
+        # y_star = constraint(model_w, X_train[iblock], Y_train[iblock])
         print("y_star: ",y_star)
         
         # find the new best value of the variable
@@ -83,8 +80,6 @@ def trainBCFW(X_train, Y_train):
         # evaluate w_i and l_i
         w_i_new = (1 - step_size)*w_i[:, iblock] + step_size*w_s
         l_i_new = (1 - step_size)*l_i[iblock] + step_size*l_s
-        # print("l_i_new: ",l_i_new)
-        # print("w_i_new: ",w_i_new)
 
         # update w and l
         w = w + w_i_new.reshape(-1,1) - w_i[:, iblock].reshape(-1,1)  # !列向量相减
@@ -95,8 +90,6 @@ def trainBCFW(X_train, Y_train):
         # update w_i and l_i
         w_i[:, iblock] = w_i_new
         l_i[iblock] = l_i_new
-        # print(l_i)
-        # print(w_i)
 
         w = ((k+1)/(k+3)) * model_w + (2/(k+3)) * w
         print('w = \n'+ str(w))

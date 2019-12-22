@@ -18,15 +18,6 @@ def granger(traj1, traj2):
         F = 0
     else:
         # 根据两个轨迹frameid的交集，分别筛出两个轨迹同时出现的部分
-        # inter_t1 = []
-        # inter_t2 = []
-        # for i in range(len(interset_f)):
-        #     if traj1[i,0] == interset_f[i] or traj2[i,0] == interset_f[i]:
-        #         inter_t1.append(list(traj1[i, 1:]))
-        #         inter_t2.append(list(traj2[i, 1:]))
-        # inter_traj1 = np.array(inter_t1)
-        # inter_traj2 = np.array(inter_t2)
-        
         inter_traj1 = []
         inter_traj2 = []
         for i in range(len(interset_f)):
@@ -43,8 +34,6 @@ def granger(traj1, traj2):
         length = inter_traj1.shape[0]
 
         # 均值
-        # mean_traj1 = inter_traj1.mean(axis=0)
-        # mean_traj2 = inter_traj2.mean(axis=0)
         mean_traj1 = list(npmean(inter_traj1))
         mean_traj2 = list(npmean(inter_traj2))
         

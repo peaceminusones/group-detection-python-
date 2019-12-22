@@ -45,12 +45,10 @@ def parfor(information, i):
             Y_temp[k] = y[j]
     
     delta,_,_ = loss.lossGM(Y_train, Y_temp)
-    # groud truth
-    psi_g = fm.featureMap(X_train, Y_train)
     # train
-    psi_t = fm.featureMap(X_train, Y_temp)
+    psi = fm.featureMap(X_train, Y_temp)
 
-    H_temp = (delta + np.dot(model_w.reshape(1,-1), psi_t))[0] 
+    H_temp = (delta + np.dot(model_w.reshape(1,-1), psi))[0] 
 
     return [H_temp, Y_temp]
 
@@ -80,12 +78,10 @@ def constraintFind(model_w, X_train, Y_train):
             delta,_,_ = loss.lossGM(Y_train, y) # 求Δ(yi, y)
             # print(delta)
             
-            # groud truth
-            psi_g = fm.featureMap(X_train, Y_train)
             # train
-            psi_t = fm.featureMap(X_train, y)
+            psi = fm.featureMap(X_train, y)
             # print(psi)
-            H = (delta + np.dot(model_w.reshape(1,-1), psi_t))[0]   #np.mat(model_w).T*np.mat(psi).T
+            H = (delta + np.dot(model_w.reshape(1,-1), psi))[0]   #np.mat(model_w).T*np.mat(psi).T
             
             # 现在这个窗口里所有可能的couple的数量和相应的index组合【即所有cluster两两组合】
             couples = group([i for i in range(n_cluster)])
@@ -131,6 +127,7 @@ def constraintFind(model_w, X_train, Y_train):
                 # loop until something has changed
                 changed = True
             # break
+            # print(H_max)
     return y
 
 def deleteNoCouples(couples, y, x_train_detectedgroups):

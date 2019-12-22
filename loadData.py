@@ -23,7 +23,7 @@ import collections           # flatten
 import re                    # 正则
 import numpy as np 
 
-dataDirectory= "mydata/student003"
+dataDirectory= "mydata/GVEII/GVEII"
 
 def loadData(source, snd_parameter):
     # if (source == "generate trajectories"):

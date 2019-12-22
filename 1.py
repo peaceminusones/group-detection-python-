@@ -273,3 +273,51 @@ def multicore(z):
 if __name__ == '__main__':
     res = multicore(1)
     print(res)
+
+
+'''
+        print('-----------------------------------------------')
+        print("gap:",delta_i)
+        sum_d = np.sum(delta_i)
+        probability = delta_i / sum_d
+        if math.isinf(sum_d): # 如果gap值中有infinity
+            probability = np.array([1 if math.isnan(i) else i for i in probability])
+            sum_p = np.sum(probability)
+            probability = probability / sum_p
+        n_list = [i for i in range(n)]
+        i = np.random.choice(n_list, p = probability.ravel()) # 按照概率选择一个i
+        
+        print('---------------------------------------')
+        print('k = '+ str(k)+', i = ' + str(i))
+        start = time.clock()
+        model_w = w
+        # y_star = constraint(model_w, X_train[i], Y_train[i])
+        if np.all(model_w == 0):
+            i = 1
+            y_star = constraintFind(model_w, X_train[i], Y_train[i])
+        else:
+            y_star = constraint(model_w, X_train[i], Y_train[i])
+        print("y_star: ",y_star)
+        delta,_,_ = loss.lossGM(Y_train[i], y_star)
+        delta_i[i] = delta
+        print(delta)
+        w = (1 - lr)*w - lr*(np.array(fm.featureMap(X_train[i], y_star)) - np.array(fm.featureMap(X_train[i], Y_train[i]))).reshape(-1,1)
+        # w = ((k+1)/(k+3)) * model_w + (2/(k+3)) * w
+        
+        if (k + 1)%20 == 0:
+            for j in range(n):
+                y_star = constraint(w, X_train[j], Y_train[j])
+                delta,_,_ = loss.lossGM(Y_train[j], y_star)
+                delta_i[j] = delta
+            # w = ((k+1)/(k+3)) * model_w + (2/(k+3)) * w
+        
+        # if sum(delta_i)/n < delta0:
+        #     delta0 = sum(delta_i)/n
+        #     wfinal = w
+
+        w_final = np.hstack((w_final, w))
+        
+        end = time.clock()
+        print(w.reshape(1,-1)[0])
+        print("time:",end-start)
+'''
