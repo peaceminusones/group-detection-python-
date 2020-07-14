@@ -16,16 +16,20 @@ from staticDistance import staticDistance
 import flatten
 
 def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
-    # 需要把10s内所有帧的数组提出来
-    myF = myF.iloc[0:index_end, :]
-    fid= myF.iloc[-1, 0]
-    myidF = myF[myF[0] == fid]
-    myF = myF[myF[0] <= fid]
-    F = myF.values
+    # 需要把到当前帧为止的数据提出来
+    # myF = myF.iloc[0:index_end, :]
+    # fid= myF.iloc[-1, 0]
+    # myidF = myF[myF[0] == fid]
+    # myF = myF[myF[0] <= fid]
+    # F = myF.values
+    # # 将当前帧帧的不重复的track_id提取出来，表示有多少个人
+    # idF = myidF.values
+    # track_id = sorted(set(idF[:,1].astype(int)))
 
-    # 将10s内所有帧的不重复的track_id提取出来，表示有多少个人
-    idF = myidF.values
-    track_id = sorted(set(idF[:,1].astype(int)))
+    my = myF.iloc[index_start:index_end, :]
+    F = my.values
+    track_id = sorted(set(F[:,1].astype(int)))
+    myF = myF.iloc[0:index_end, :]
     # print(track_id)
     # 计算这10s内每个人在场景中待了多久（多少个frame），如果时间过短（小于3），从当前考虑的数据中删除
     deleteid = []
@@ -100,6 +104,8 @@ def getFeatureFromWindow(myF, index_start, index_end, video_par, model_par):
     
     # compute features for each couple  couples.shape[0]
     for i in range(couples.shape[0]):
+        if len(track_id) == 1:
+            break
         # 提取出第i行的couple的两个轨迹，数据类型都是dataframe
         traj1 = path[couples[i,0]]
         traj2 = path[couples[i,1]]

@@ -70,11 +70,12 @@ def trainBCFW(X_train, Y_train):
         print("l_s: ",l_s)
         
         # compute the step size
-        step_size = ((lambda_c*np.dot(w_i[:,iblock]-w_s, w) + l_s - l_i[iblock] ) / (lambda_c*np.dot(w_i[:,iblock]-w_s, w_i[:,iblock]-w_s)))[0]
-        if math.isnan(step_size):
-            continue
-        step_size = [step_size, 0][0 > step_size]
-        step_size = [step_size, 1][step_size > 1]
+        step_size = 2*n/(k+2*n)
+        # step_size = ((lambda_c*np.dot(w_i[:,iblock]-w_s, w) + l_s - l_i[iblock] ) / (lambda_c*np.dot(w_i[:,iblock]-w_s, w_i[:,iblock]-w_s)))[0]
+        # if math.isnan(step_size):
+        #     continue
+        # step_size = [step_size, 0][0 > step_size]
+        # step_size = [step_size, 1][step_size > 1]
         print("step_size: ",step_size)
 
         # evaluate w_i and l_i

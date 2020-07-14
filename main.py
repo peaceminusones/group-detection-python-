@@ -8,29 +8,53 @@ from getClustersFromWindow import getClustersFromWindow
 from loadfeature import loadfeature
 from MyEncoder import MyEncoder
 from trainBCFW import trainBCFW
-# from train import trainBCFW
+from train import train
 from trainPerceptron import trainPerceptron
 from test import test_struct_svm
 from showCluster import showCluster
-
+from showCluster_eth_hotel import showCluster_eth_hotel
+import time
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 dataDirectory = "mydata/student003"
+# dataDirectory = "mydata/GVEII/GVEII"
+# dataDirectory = "mydata/ETH"
+# dataDirectory = "mydata/Hotel"
+
+# dataDirectory = "mydata/CMD/CMD/1dawei1"
+# dataDirectory = "mydata/CMD/CMD/3shatian6"
 
 class model_par:
-    display = True
+    # student003/GEVII -------------------------
     window_size = 1
-    trainingSetSize = 200
-    testingSetSize = 200 - trainingSetSize
+    trainingSetSize = 180
+    testingSetSize = 180 - trainingSetSize
+    # ------------------------------------------
+    # ETH --------------------------------------
+    # window_size = 90
+    # trainingSetSize = 40
+    # testingSetSize = 40 - trainingSetSize
+    # ------------------------------------------
+    # Hotel --------------------------------------
+    # window_size = 200
+    # trainingSetSize = 20
+    # testingSetSize = 20 - trainingSetSize
+    # ------------------------------------------
+    # 1dawei1/3shatian6 -------------------------
+    # window_size = 1
+    # trainingSetSize = 9
+    # testingSetSize = 9 - trainingSetSize
+    # ------------------------------------------
     features = [1, 1, 1, 1]
     numberOfFeatures = sum(features)
+    display = True
 
 class model:
-    feature_extraction = True
-    trainMe = True
-    preTrain_w = []
+    feature_extraction = False
+    trainMe = False
     testMe = True
+    preTrain_w = []
 
 if __name__ == "__main__":
     """
@@ -45,7 +69,14 @@ if __name__ == "__main__":
     """
     index_start = 0
     index_end = 0
-    # test_starting_index = 0
+    # print(list(set(myF.iloc[:,1].values)))
+    # print(len(list(set(myF.iloc[:,1].values))))
+    # GVEII 太大了，筛选一下，1-7-13-16 ------- 
+    # myF = myF[(myF[0]-1)%6 == 0]
+    # ---------------------------------------
+    # ETH&Hotel 的frameid不是int类型，所以需要转换------
+    myF[0] = myF[0].astype(int)
+    # -------------------------------------------------
     if model.feature_extraction or not(os.path.exists(dataDirectory + "/featureX.json") and os.path.exists(dataDirectory + "/featureY.json")):
         X = dict()   # input data
         Y = dict()   # ground truth info
@@ -54,7 +85,6 @@ if __name__ == "__main__":
 
         for i in range(model_par.trainingSetSize + model_par.testingSetSize):
 
-            # window_size = 10s, 需要把10s内所有帧的数组提出来，所以需要得到第10s最后一帧的索引
             while (index_end <= myF.shape[0]) and (myF.iloc[index_end, 0] <= (myF.iloc[index_start, 0] + model_par.window_size * video_par['frame_rate'])):
                 index_end = index_end + 1
             print("index start: ", index_start," ---> index end: ", index_end)
@@ -83,19 +113,22 @@ if __name__ == "__main__":
         print("Extraction from featureX")
         # 直接从文件中提取特征
         with open(dataDirectory + '/featureX.json', 'r') as f:
-            X1 = json.load(f)
+            X = json.load(f)
         print("Extraction from featureY")
         with open(dataDirectory + '/featureY.json', 'r') as f:
             Y = json.load(f)
-        X, _ = loadfeature(dataDirectory,"student003.mat")
+        # X, _ = loadfeature(dataDirectory,"student003.mat")
         print("done!\n")
-        for i in range(len(X)):
-            X[i]['trackid'] = X1[str(i)]['trackid']
-            X[i]['couples'] = X1[str(i)]['couples']
-            X[i]['detectedGroups'] = X1[str(i)]['detectedGroups']
+        # for i in range(len(X)):
+        #     X[i]['trackid'] = X1[str(i)]['trackid']
+        #     X[i]['couples'] = X1[str(i)]['couples']
+        #     X[i]['detectedGroups'] = X1[str(i)]['detectedGroups']
             # print("1:",1 - X[i]['myfeatures'][:,1])
             # print("2:",np.array(X1[str(i)]['myfeatures'])[:,1])
+            # X[i]['myfeatures'][:,0] = np.array(X1[str(i)]['myfeatures'])[:,0]
             # X[i]['myfeatures'][:,1] = np.array(X1[str(i)]['myfeatures'])[:,1]
+            # X[i]['myfeatures'][:,2] = np.array(X1[str(i)]['myfeatures'])[:,2]
+            # X[i]['myfeatures'][:,3] = np.array(X1[str(i)]['myfeatures'])[:,2]
 
         # Y = {'0':[[[11], [10], [12], [13]], [[75], [76]], [[213], [214], [215], [216]], [[217], [219], [220]], [[7], [8]], [[21], [22]], [[9], [273]], [[14], [16]], [[19], [20]], [[27], [29]], [[28], [30]],[[77], [78]], [1], [2], [3], [4], [5], [6], [15], [17], [18], [23], [24], [25], [26], [31], [73], [74], [218], [274], [409]],
         #      '1':[[[217], [219], [220]], [[7], [8]], [[10], [11], [12], [13]], [[31], [32]], [[14], [16]], [[28], [30]], [[419], [420]], [[27], [29]], [[19], [20]], [[80], [81]], [[33], [34]], [[35], [36]], [[77], [78]], [[4], [75]], [3], [5], [9], [17], [23], [24], [25], [26], [37], [73], [74], [76], [79], [82], [83], [315], [410], [411]],
@@ -150,34 +183,34 @@ if __name__ == "__main__":
         n_feature = sum(model_par.features)
         mymax = np.zeros((1, n_feature))
         for i in range(model_par.trainingSetSize + model_par.testingSetSize):
-            # arrayX = np.abs(np.array(X[str(i)]['myfeatures']))
-            arrayX = np.abs(np.array(X[i]['myfeatures']))
+            arrayX = np.abs(np.array(X[str(i)]['myfeatures']))
+            # arrayX = np.abs(np.array(X[i]['myfeatures']))
+            if arrayX.shape[0] == 0:
+                continue
             columnMax = np.nanmax(arrayX, axis=0)  # 得到每一列的最大值
             if columnMax.shape[0] > 0:
                 merge = np.vstack((mymax, columnMax))
                 mymax = np.nanmax(merge, axis=0)
         # print(mymax)
         # mymax = np.array([0.5776,2.2642,0.0553])
-        
-        # # --------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------
         
         # 特征标准化 & 创建互补特征 --------------------------------------------------------
         for i in range(model_par.trainingSetSize + model_par.testingSetSize):
             # make them similarity measures between 0 and 1
-            # length = np.array(X[str(i)]['myfeatures']).shape[0]
-            length = np.array(X[i]['myfeatures']).shape[0]
-            if  length > 0:
+            length = np.array(X[str(i)]['myfeatures']).shape[0]
+            # length = np.array(X[i]['myfeatures']).shape[0]
+            if length > 0:
                 mymax_array2D = np.array([mymax for _ in range(length)])
-                # X[str(i)]['myfeatures'] = 1 - (np.array(X[str(i)]['myfeatures']) / mymax_array2D)
-                X[i]['myfeatures'] = 1 - (np.array(X[i]['myfeatures']) / mymax_array2D)
+                X[str(i)]['myfeatures'] = 1 - (np.array(X[str(i)]['myfeatures']) / mymax_array2D)
+                # X[i]['myfeatures'] = 1 - (np.array(X[i]['myfeatures']) / mymax_array2D)
 
-            # 创建互补的特征，以更好地识别相似阈值
-            for j in range(model_par.numberOfFeatures):
-                # value = X[str(i)]['myfeatures'][:, j] - 1
-                # X[str(i)]['myfeatures'] = np.insert(X[str(i)]['myfeatures'], model_par.numberOfFeatures + j, values=value, axis=1)
-                value = X[i]['myfeatures'][:, j] - 1
-                X[i]['myfeatures'] = np.insert(X[i]['myfeatures'], model_par.numberOfFeatures + j, values=value, axis=1)
-        
+                # 创建互补的特征，以更好地识别相似阈值
+                for j in range(model_par.numberOfFeatures):
+                    value = X[str(i)]['myfeatures'][:, j] - 1
+                    X[str(i)]['myfeatures'] = np.insert(X[str(i)]['myfeatures'], model_par.numberOfFeatures + j, values=value, axis=1)
+                    # value = X[i]['myfeatures'][:, j] - 1
+                    # X[i]['myfeatures'] = np.insert(X[i]['myfeatures'], model_par.numberOfFeatures + j, values=value, axis=1)
         # print(X[0]['couples'].index([21,22]))
         # index = X[0]['couples'].index([21,22])
         # print(X[0]['myfeatures'][index])
@@ -187,7 +220,7 @@ if __name__ == "__main__":
         # print(Y[1])
         # print(np.array(X[0]['detectedGroups']).shape)
         print("data: " + dataDirectory + ", training: " + str(model_par.trainingSetSize) + ", testing: " + str(model_par.testingSetSize))
-        # # --------------------------------------------------------------------------------
+        # --------------------------------------------------------------------------------
         
         """
         # Training -----------------------------------------------------------------------
@@ -199,29 +232,20 @@ if __name__ == "__main__":
         # trainindex = list(set(allindex).difference(set(testindex)))
         # trainindex = [5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
         # print(testindex, trainindex)
-        # X_test = [X[str(i)] for i in allindex]
+        X_test = [X[str(i)] for i in allindex if len(X[str(i)]['trackid']) > 1]
+        Y_test = [Y[str(i)] for i in allindex if len(X[str(i)]['trackid']) > 1]
+        X_train = [X[str(i)] for i in allindex if len(X[str(i)]['trackid']) > 1]
+        Y_train = [Y[str(i)] for i in allindex if len(X[str(i)]['trackid']) > 1]
+        # X_test = [X[i] for i in allindex]
         # Y_test = [Y[str(i)] for i in allindex]
-        # X_train = [X[str(i)] for i in allindex]
+        # X_train = [X[i] for i in allindex]
         # Y_train = [Y[str(i)] for i in allindex]
-        X_test = [X[i] for i in allindex]
-        Y_test = [Y[str(i)] for i in allindex]
-        X_train = [X[i] for i in allindex]
-        Y_train = [Y[str(i)] for i in allindex]
 
         if model.trainMe:
             print("\nTraining the classifier on the training set:\n")
-            modelBCFW_weight= trainPerceptron(X_train, Y_train)
+            modelBCFW_weight= train(X_train, Y_train)
             print("modelBCFW_weight=\n", modelBCFW_weight)
         else:
-            # modelBCFW_weight = model.preTrain_w
-            # modelBCFW_weight = np.array([[-0.12815193],[ 0.02901785],[ 0.02662733],[ 0.05865231],[-0.1421993 ],[ 0.01497048],[ 0.01257996],[ 0.04460494]])
-            # modelBCFW_weight = np.array([[-0.11746883],[ 0.07694488],[ 0.01152641],[-0.04012392],[-0.15165551],[ 0.0427582 ],[-0.02266027],[-0.07431061]])
-            # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            # modelBCFW_weight = np.array([[0.24849833],[0.09128355],[-0.07110776],[0.11287341]])
-            # modelBCFW_weight = np.array([[0.21745055],[0.26089283],[0.01796708],[0.14768449]])
-            # modelBCFW_weight = np.array([[ 0.63003117],[-0.00786649],[-0.00511848],[ 0.17005114]])
-            # modelBCFW_weight = np.array( [[ 0.23654525],[ 0.1966749 ],[-0.00677805],[ 0.12175055]])
-            # modelBCFW_weight = np.array([[0.63998534],[0.49036008],[0.14217234],[0.34376184]])
             # modelBCFW_weight = np.array([[-0.06092241],[ 0.06045744],[ 0.00934401],[-0.01411255],[-0.09469713],[ 0.02668272],[-0.0244307 ],[-0.04788727]])
             # modelBCFW_weight = np.array([[-0.19702614],[ 0.18490929],[ 0.14150672],[-0.10756406],[-0.33164412],[ 0.05029131],[ 0.00688874],[-0.24218204]])
             # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -229,10 +253,12 @@ if __name__ == "__main__":
             # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             # modelBCFW_weight = np.array([[-0.05508524],[-0.02863407],[ 0.00828818],[-0.01793417],[ 0.08334105],[ 0.05688988],[ 0.01996764],[ 0.04618999]])
             # 18% delta > 0.15
-            modelBCFW_weight = np.array([[-0.1331842 ],[ 0.07847764],[ 0.01151993],[-0.01393907],[-0.1811842 ],[ 0.03047764],[-0.03648007],[-0.06193907]])
+            # modelBCFW_weight = np.array([[-0.1331842 ],[ 0.07847764],[ 0.01151993],[-0.01393907],[-0.1811842 ],[ 0.03047764],[-0.03648007],[-0.06193907]])
             # 19% delta > 0.1
             # modelBCFW_weight = np.array([[-0.13821461],[ 0.11967323],[ 0.02188043],[-0.04908633],[-0.18841661],[ 0.06947123],[-0.02832157],[-0.09928833]])
-            print("\nLoad model weight: " + str(modelBCFW_weight.T[0]))
+            # modelBCFW_weight = np.array([[-0.08177416],[0.03839987],[0.0183285],[-0.01074741],[-0.09922939],[0.02094464],[0.00087327],[-0.02820264]])
+            modelBCFW_weight=np.array([[-0.59440458],[ 0.08531968],[-0.01621233],[ 0.24123876],[-0.51339259],[ 0.16633167],[ 0.06479966],[ 0.32225075]])
+            print("\nLoad model weight: ")# + str(modelBCFW_weight.T[0]))
 
         """
         Testing ----------------------------------------------------------
@@ -273,4 +299,5 @@ if __name__ == "__main__":
                         19: [[[191], [192], [362], [363]], [[401], [402]], [[210], [211]], [[205], [206]], [[264], [265]], [[208], [209]], [[189], [190]], [193], [198], [200], [201], [202], [203], [204], [207], [212], [263], [266], [267], [291], [337], [366], [369], [370], [371], [433]]}
             
         if model_par.display:
-            showCluster(myF, Y_test, myY_test, model_par, video_par, dataDirectory)
+            # showCluster(myF, Y_test, myY_test, model_par, video_par, dataDirectory)
+            showCluster_eth_hotel(myF, Y_test, myY_test, model_par, video_par, dataDirectory)

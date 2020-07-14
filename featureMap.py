@@ -15,7 +15,7 @@ def featureMap(X_train, y):
         y: 当前窗口下所有行人的各自的id
         X_train: 当前窗口下所有轨迹的特征
     """
-    psi = np.zeros(X_train['myfeatures'].shape[1])
+    psi = np.zeros(np.array(X_train['myfeatures']).shape[1])
     # loop through each cluster
     for i in range(len(y)):
         # 当前窗口下的cluster再进行两两成组，如果是[1]，则group为[]，即空

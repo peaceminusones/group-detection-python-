@@ -23,8 +23,6 @@ import collections           # flatten
 import re                    # 正则
 import numpy as np 
 
-dataDirectory= "mydata/GVEII/GVEII"
-
 def loadData(source, snd_parameter):
     # if (source == "generate trajectories"):
     #     [myF, clusters, video_par] = traj(float(snd_parameter))
@@ -75,6 +73,8 @@ def loadData(source, snd_parameter):
                 video_par['videoObj'] = snd_parameter + "/%06d.jpg"
             elif os.path.exists(snd_parameter + "/000001.jpeg"):
                 video_par['videoObj'] = snd_parameter + "/%06d.jpeg"
+            elif os.path.exists(snd_parameter + "/000840.jpg"):
+                video_par['videoObj'] = snd_parameter + "/%06d.jpg"
             else:
                 video_par['videoObj'] = 0
     else:
@@ -102,11 +102,6 @@ def flatten(x):
             result.append(el)
     return result
 
-# if __name__ == "__main__":
-#     myF, clusters, video_par = loadData("load from file", dataDirectory)
-#     # print(myF, clusters, video_par)
-#     print(myF.iloc[1,2])
-    
 
 class DataLoader():
     def __init__(self, datasets, col):

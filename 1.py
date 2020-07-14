@@ -1,323 +1,489 @@
 
-# import json
-# import numpy as np
+#,import,json
+#,import,numpy,as,np
 
-# data = dict()
-# a = [1e-5,0.024583569845257874,-4,5,7,8,3,43,65,45,0.0,14,67]
-# b = np.zeros((4,4))
-# c = np.ones((5,3))
-# d = np.array([[5,7,1],[7,3,2],[9,7,6],[1,0,13]])
+#,data,=,dict()
+#,a,=,[1e-5,0.024583569845257874,-4,5,7,8,3,43,65,45,0.0,14,67]
+#,b,=,np.zeros((4,4))
+#,c,=,np.ones((5,3))
+#,d,=,np.array([[5,7,1],[7,3,2],[9,7,6],[1,0,13]])
 
-# e = [0,35,62,13,7,8,3,43,65,45,0,14,67]
-# f = np.ones((4,4))
-# g = np.zeros((5,3))
-# h = np.array([[0.34234,1.454363,2.654534],[6.34532,0.345345,0.00032],[4.53458,56.7345,5.64536],[1.4534,42.45346,1.67533]])
+#,e,=,[0,35,62,13,7,8,3,43,65,45,0,14,67]
+#,f,=,np.ones((4,4))
+#,g,=,np.zeros((5,3))
+#,h,=,np.array([[0.34234,1.454363,2.654534],[6.34532,0.345345,0.00032],[4.53458,56.7345,5.64536],[1.4534,42.45346,1.67533]])
 
-# for i in range(0,2,2):
-#     data[i] = {'trackid': a, 'F': b.tolist(), 'couples': c.tolist(), 'myfeatures': d.tolist()}
-#     data[i+1] = {'trackid': e, 'F': f.tolist(), 'couples': g.tolist(), 'myfeatures': h.tolist()}
+#,for,i,in,range(0,2,2):
+#,,,,,data[i],=,{'trackid':,a,,'F':,b.tolist(),,'couples':,c.tolist(),,'myfeatures':,d.tolist()}
+#,,,,,data[i+1],=,{'trackid':,e,,'F':,f.tolist(),,'couples':,g.tolist(),,'myfeatures':,h.tolist()}
 
-# with open('data.json','w') as f:
-#     json.dump(data, f, sort_keys=True, indent=4, separators=(',', ': '))
-
-
-
-# import numpy as np 
-# import collections
-# import itertools
-# from itertools import combinations 
+#,with,open('data.json','w'),as,f:
+#,,,,,json.dump(data,,f,,sort_keys=True,,indent=4,,separators=(',',,':,'))
 
 
-# def group(track_id):
-#     if len(track_id) > 1:
-#         track_id = flatten(track_id)
-#     return np.array(list(combinations(track_id, 2)))
 
-# def flatten(x):
-#     result = list(itertools.chain.from_iterable(x))
-#     # for el in x:
-#     #     if isinstance(x, collections.Iterable) and not isinstance(el, str):
-#     #         result.extend(flatten(el))
-#     #     else:
-#     #         result.append(el)
-#     return result
+#,import,numpy,as,np,
+#,import,collections
+#,import,itertools
+#,from,itertools,import,combinations,
 
 
-# a = group([])
-# print(a)
+#,def,group(track_id):
+#,,,,,if,len(track_id),>,1:
+#,,track_id,=,flatten(track_id)
+#,,,,,return,np.array(list(combinations(track_id,,2)))
 
-# import matplotlib.pyplot as plt
-# import numpy as np
-# import time
-# from math import *
- 
-# # plt.ion() #开启interactive mode 成功的关键函数
-# # plt.figure(1)
-# t = np.linspace(0, 20, 100)
- 
-# for i in range(20):
-# 	# plt.clf() # 清空画布上的所有内容。此处不能调用此函数，不然之前画出的轨迹，将会被清空。
-#     y = np.sin(t*i/10.0)
-#     plt.plot(t, y) # 一条轨迹
-#     plt.show()
-#     plt.close()
-#     # plt.draw()#注意此函数需要调用
-#     # plt.pause(1)
-#     # time.sleep(1)
-# import multiprocessing
-
-# def a(x):
-#     return x**2
+#,def,flatten(x):
+#,,,,,result,=,list(itertools.chain.from_iterable(x))
+#,,,,,#,for,el,in,x:
+#,,,,,#,,,,,if,isinstance(x,,collections.Iterable),and,not,isinstance(el,,str):
+#,,,,,#,,result.extend(flatten(el))
+#,,,,,#,,,,,else:
+#,,,,,#,,result.append(el)
+#,,,,,return,result
 
 
-# if __name__ == "__main__":
-    
-#     for k in range(10):
-#         v = []
-#         p = multiprocessing.Pool(6) # 声明了6个线程数量
-#         v = [p.apply_async(a, (i+k,)) for i in range(8)]
-#         p.close()
-#         p.join()
-#         print([r.get() for r in v])
-    
-#     # H_temp_and_obj_Y_temp = [r.get() for r in v]
-#     # print(H_temp_and_obj_Y_temp)
+#,a,=,group([])
+#,print(a)
+
+#,import,matplotlib.pyplot,as,plt
+#,import,numpy,as,np
+#,import,time
+#,from,math,import,*
+
+#,#,plt.ion(),#开启interactive,mode,成功的关键函数
+#,#,plt.figure(1)
+#,t,=,np.linspace(0,,20,,100)
+
+#,for,i,in,range(20):
+#,	#,plt.clf(),#,清空画布上的所有内容。此处不能调用此函数，不然之前画出的轨迹，将会被清空。
+#,,,,,y,=,np.sin(t*i/10.0)
+#,,,,,plt.plot(t,,y),#,一条轨迹
+#,,,,,plt.show()
+#,,,,,plt.close()
+#,,,,,#,plt.draw()#注意此函数需要调用
+#,,,,,#,plt.pause(1)
+#,,,,,#,time.sleep(1)
+#,import,multiprocessing
+
+#,def,a(x):
+#,,,,,return,x**2
 
 
-# import matplotlib.pyplot as plt
+#,if,__name__,==,"__main__":
 
-# ax = []                    # 定义一个 x 轴的空列表用来接收动态的数据
-# ay = []                    # 定义一个 y 轴的空列表用来接收动态的数据
-# plt.ion()                  # 开启一个画图的窗口
-# for i in range(100):       # 遍历0-99的值
-# 	ax.append(i)           # 添加 i 到 x 轴的数据中
-# 	ay.append(i**2)        # 添加 i 的平方到 y 轴的数据中
-# 	plt.clf()              # 清除之前画的图
-# 	plt.plot(ax,ay)        # 画出当前 ax 列表和 ay 列表中的值的图形
-# 	plt.pause(0.1)         # 暂停一秒
-# 	plt.ioff()             # 关闭画图的窗口
+#,,,,,for,k,in,range(10):
+#,,v,=,[]
+#,,p,=,multiprocessing.Pool(6),#,声明了6个线程数量
+#,,v,=,[p.apply_async(a,,(i+k,)),for,i,in,range(8)]
+#,,p.close()
+#,,p.join()
+#,,print([r.get(),for,r,in,v])
 
-# import numpy as np
-# from scipy.linalg import solve
-# a = np.array([[1, 1, 7], [2, 3, 5], [4, 2, 6]])
-# b = np.array([2, 3, 4])
-# x1 = solve(a, b)
-# # x2 = np.mat(b) * np.mat(a).I
-# x2 = b/a
-# print(x1,x2)
-# import flatten
-
-# print(flatten.flatten([[1],[2]]))
-
-# import numpy as np
-# from itertools import combinations 
-# import itertools
-# import collections
-# import flatten
-
-# def group(track_id):
-#     if len(track_id) > 1:
-#         track_id = flatten.flatten(track_id)
-#     track_id = sorted(track_id)
-#     return np.array(list(combinations(track_id, 2)))
+#,,,,,#,H_temp_and_obj_Y_temp,=,[r.get(),for,r,in,v]
+#,,,,,#,print(H_temp_and_obj_Y_temp)
 
 
-# print(group([[1],[2],[3]]))
-# print(group([1,2,3]))
+#,import,matplotlib.pyplot,as,plt
 
-# import numpy as np
-# import cupy as cp
-# import time
- 
-# x=np.zeros((1024,512,4,4))*1024.
-# y=np.zeros((1024,512,4,1))*512.3254
-# time1=time.time()
-# for i in range(20):
-#     z=x*y
-# print('average time for 20 times cpu:',(time.time()-time1)/20.)
- 
-# x=cp.zeros((1024,512,4,4))*1024.
-# y=cp.zeros((1024,512,4,1))*512.3254
-# z=cp.zeros((10,20))
-# a= cp.max(cp.array([[2,4,5,6],[4,0,6,7]]),axis=0)
-# print(a)
-# time1=time.time()
-# for i in range(20):
-#     z=x*y
-# print('average time for 20 times gpu:',(time.time()-time1)/20.)
+#,ax,=,[],,,,,,#,定义一个,x,轴的空列表用来接收动态的数据
+#,ay,=,[],,,,,,#,定义一个,y,轴的空列表用来接收动态的数据
+#,plt.ion(),,,,#,开启一个画图的窗口
+#,for,i,in,range(100):,,,,,,,#,遍历0-99的值
+#,	ax.append(i),,,,#,添加,i,到,x,轴的数据中
+#,	ay.append(i**2),#,添加,i,的平方到,y,轴的数据中
+#,	plt.clf(),,,,,,,#,清除之前画的图
+#,	plt.plot(ax,ay),#,画出当前,ax,列表和,ay,列表中的值的图形
+#,	plt.pause(0.1),,#,暂停一秒
+#,	plt.ioff(),,,,,,#,关闭画图的窗口
 
-# import tensorflow as tf
-# import timeit
+#,import,numpy,as,np
+#,from,scipy.linalg,import,solve
+#,a,=,np.array([[1,,1,,7],,[2,,3,,5],,[4,,2,,6]])
+#,b,=,np.array([2,,3,,4])
+#,x1,=,solve(a,,b)
+#,#,x2,=,np.mat(b),*,np.mat(a).I
+#,x2,=,b/a
+#,print(x1,x2)
+#,import,flatten
 
-# with tf.device('/cpu:0'):
-#    cpu_a = tf.random.normal([10000, 1000])
-#    cpu_b = tf.random.normal([1000, 2000])
-#    print(cpu_a.device, cpu_b.device)
+#,print(flatten.flatten([[1],[2]]))
 
-# with tf.device('/gpu:0'):
-#    gpu_a = tf.random.normal([10000, 1000])
-#    gpu_b = tf.random.normal([1000, 2000])
-#    print(gpu_a.device, gpu_b.device)
+#,import,numpy,as,np
+#,from,itertools,import,combinations,
+#,import,itertools
+#,import,collections
+#,import,flatten
 
-# def cpu_run():
-#    with tf.device('/cpu:0'):
-#       c = tf.matmul(cpu_a, cpu_b)
-#    return c
-
-# def gpu_run():
-#    with tf.device('/gpu:0'):
-#       c = tf.matmul(gpu_a, gpu_b)
-#    return c
-
-# # warm up 
-# cpu_time = timeit.timeit(cpu_run, number=10)
-# gpu_time = timeit.timeit(gpu_run, number=10)
-# print('warmup:', cpu_time, gpu_time)
-
-# cpu_time = timeit.timeit(cpu_run, number=10)
-# gpu_time = timeit.timeit(gpu_run, number=10)
-# print('run time:', cpu_time, gpu_time)
+#,def,group(track_id):
+#,,,,,if,len(track_id),>,1:
+#,,track_id,=,flatten.flatten(track_id)
+#,,,,,track_id,=,sorted(track_id)
+#,,,,,return,np.array(list(combinations(track_id,,2)))
 
 
-import matplotlib.pyplot as plt
+#,print(group([[1],[2],[3]]))
+#,print(group([1,2,3]))
+
+#,import,numpy,as,np
+#,import,cupy,as,cp
+#,import,time
+
+#,x=np.zeros((1024,512,4,4))*1024.
+#,y=np.zeros((1024,512,4,1))*512.3254
+#,time1=time.time()
+#,for,i,in,range(20):
+#,,,,,z=x*y
+#,print('average,time,for,20,times,cpu:',(time.time()-time1)/20.)
+
+#,x=cp.zeros((1024,512,4,4))*1024.
+#,y=cp.zeros((1024,512,4,1))*512.3254
+#,z=cp.zeros((10,20))
+#,a=,cp.max(cp.array([[2,4,5,6],[4,0,6,7]]),axis=0)
+#,print(a)
+#,time1=time.time()
+#,for,i,in,range(20):
+#,,,,,z=x*y
+#,print('average,time,for,20,times,gpu:',(time.time()-time1)/20.)
+
+#,import,tensorflow,as,tf
+#,import,timeit
+
+#,with,tf.device('/cpu:0'):
+#,,,,cpu_a,=,tf.random.normal([10000,,1000])
+#,,,,cpu_b,=,tf.random.normal([1000,,2000])
+#,,,,print(cpu_a.device,,cpu_b.device)
+
+#,with,tf.device('/gpu:0'):
+#,,,,gpu_a,=,tf.random.normal([10000,,1000])
+#,,,,gpu_b,=,tf.random.normal([1000,,2000])
+#,,,,print(gpu_a.device,,gpu_b.device)
+
+#,def,cpu_run():
+#,,,,with,tf.device('/cpu:0'):
+#,,,,,,,c,=,tf.matmul(cpu_a,,cpu_b)
+#,,,,return,c
+
+#,def,gpu_run():
+#,,,,with,tf.device('/gpu:0'):
+#,,,,,,,c,=,tf.matmul(gpu_a,,gpu_b)
+#,,,,return,c
+
+#,#,warm,up,
+#,cpu_time,=,timeit.timeit(cpu_run,,number=10)
+#,gpu_time,=,timeit.timeit(gpu_run,,number=10)
+#,print('warmup:',,cpu_time,,gpu_time)
+
+#,cpu_time,=,timeit.timeit(cpu_run,,number=10)
+#,gpu_time,=,timeit.timeit(gpu_run,,number=10)
+#,print('run,time:',,cpu_time,,gpu_time)
+
+
+# import,matplotlib.pyplot,as,plt
+# import,numpy,as,np
+# import,time
+# from,math,import,*
+
+#,plt.ion(),#开启interactive,mode,成功的关键函数
+#,plt.figure(1)
+#,t,=,[0]
+#,t_now,=,0
+#,m,=,[sin(t_now)]
+
+#,for,i,in,range(2000):
+#,,,,,plt.clf(),#清空画布上的所有内容
+#,,,,,t_now,=,i*0.1
+#,,,,,t.append(t_now)#模拟数据增量流入，保存历史数据
+#,,,,,m.append(sin(t_now))#模拟数据增量流入，保存历史数据
+#,,,,,plt.plot(t,m,'-r')
+#,,,,,plt.pause(0.01)
+
+#,#,-*-,coding:,utf-8,-*-
+#,import,cv2
+#,import,matplotlib.pyplot,as,plt
+#,import,numpy,as,np
+#,from,scipy.spatial,import,ConvexHull
+#,##########scipy,凸包################
+#,#,points,=,np.random.rand(30,,2)
+#,points,=,np.array([[680.,489.],
+#,,[675.32088886,501.85575219],
+#,,[663.47296355,508.69615506],
+#,,[650.,,506.32050808],
+#,,[641.20614758,495.84040287],
+#,,[641.20614758,482.15959713],
+#,,[650.,,471.67949192],
+#,,[663.47296355,469.30384494],
+#,,[675.32088886,476.14424781],
+#,,[680.,,489.,],
+#,,[700.,,455.,],
+#,,[695.32088886,467.85575219],
+#,,[683.47296355,474.69615506],
+#,,[670.,,472.32050808],
+#,,[661.20614758,461.84040287],
+#,,[661.20614758,448.15959713],
+#,,[670.,,437.67949192],
+#,,[683.47296355,435.30384494],
+#,,[695.32088886,442.14424781],
+#,,[700.,,455.,]])
+#,#,print(points)
+#,hull,=,ConvexHull(points)
+#,#,plt.plot(points[:,0],,points[:,1],,'o')
+#,#,hull.vertices,得到凸轮廓坐标的索引值，逆时针画
+#,hull1=hull.vertices.tolist()#要闭合必须再回到起点[0]
+#,hull1.append(hull1[0])
+#,plt.plot(points[hull1,0],,points[hull1,1],,'r--',lw=2)
+#,#,for,i,in,range(len(hull1)-1):
+#,#,,,,,plt.text(points[hull1[i],0],,points[hull1[i],1],str(i),fontsize=20)
+#,plt.show()
+#,import,flatten
+#,from,itertools,import,combinations,
+#,def,group(track_id):
+#,,,,,if,len(track_id),>,1:
+#,,track_id,=,flatten.flatten(track_id)
+#,,,,,track_id,=,sorted(track_id)
+#,,,,,return,np.array(list(combinations(track_id,,2)))
+#,merge,=,[]
+#,mycouples,=group([[1],[2],[3]])
+#,print(group([1]))
+#,print([[mycouples[1][0]],,[mycouples[1][1]]])
+#,merge,=,merge,+,[mycouples[1][0],,mycouples[1][1]]
+#,print(merge)
+#,merge,=,merge,+,[mycouples[2][0],,mycouples[2][1]]
+#,print(set([1,2,3]),==,set([1,2,3]))
+#,print(flatten.flatten([[1],[2]]))
+
+#,import,multiprocessing,as,mp
+#,import,itertools
+#,from,functools,import,partial
+
+#,def,job(z,,r,,item):
+#,,,,,x,=,item
+#,,,,,return,x,+,z,+,r
+
+#,def,multicore(z):
+#,,,,,x_y,=,list(range(10))
+#,,,,,print(x_y)
+#,,,,,r,=,2
+#,,,,,func,=,partial(job,,z,,r)
+#,,,,,pool,=,mp.Pool(),,#,无参数时，使用所有cpu核
+#,,,,,res,=,pool.map(func,,x_y)
+#,,,,,return,res
+
+#,if,__name__,==,'__main__':
+#,,,,,res,=,multicore(1)
+#,,,,,print(res)
+
+
+'''
+,print('-----------------------------------------------')
+,print("gap:",delta_i)
+,sum_d,=,np.sum(delta_i)
+,probability,=,delta_i,/,sum_d
+,if,math.isnp.inf(sum_d):,#,如果gap值中有np.infinity
+,,,,,probability,=,np.array([1,if,math.isnan(i),else,i,for,i,in,probability])
+,,,,,sum_p,=,np.sum(probability)
+,,,,,probability,=,probability,/,sum_p
+,n_list,=,[i,for,i,in,range(n)]
+,i,=,np.random.choice(n_list,,p,=,probability.ravel()),#,按照概率选择一个i
+,
+,print('---------------------------------------')
+,print('k,=,'+,str(k)+',,i,=,',+,str(i))
+,start,=,time.clock()
+,model_w,=,w
+,#,y_star,=,constraint(model_w,,X_train[i],,Y_train[i])
+,if,np.all(model_w,==,0):
+,,,,,i,=,1
+,,,,,y_star,=,constraintFind(model_w,,X_train[i],,Y_train[i])
+,else:
+,,,,,y_star,=,constraint(model_w,,X_train[i],,Y_train[i])
+,print("y_star:,",y_star)
+,delta,_,_,=,loss.lossGM(Y_train[i],,y_star)
+,delta_i[i],=,delta
+,print(delta)
+,w,=,(1,-,lr)*w,-,lr*(np.array(fm.featureMap(X_train[i],,y_star)),-,np.array(fm.featureMap(X_train[i],,Y_train[i]))).reshape(-1,1)
+,#,w,=,((k+1)/(k+3)),*,model_w,+,(2/(k+3)),*,w
+,
+,if,(k,+,1)%20,==,0:
+,,,,,for,j,in,range(n):
+,,y_star,=,constraint(w,,X_train[j],,Y_train[j])
+,,delta,_,_,=,loss.lossGM(Y_train[j],,y_star)
+,,delta_i[j],=,delta
+,,,,,#,w,=,((k+1)/(k+3)),*,model_w,+,(2/(k+3)),*,w
+,
+,#,if,sum(delta_i)/n,<,delta0:
+,#,,,,,delta0,=,sum(delta_i)/n
+,#,,,,,wfinal,=,w
+
+,w_final,=,np.hstack((w_final,,w))
+,
+,end,=,time.clock()
+,print(w.reshape(1,-1)[0])
+,print("time:",end-start)
+'''
+
+#,import,cv2
+#,vidcap,=,cv2.VideoCapture('mydata/Hotel/hotel.avi')
+#,success,image,=,vidcap.read()
+#,count,=,0
+#,success,=,True
+#,while,success:
+#,,,,,success,image,=,vidcap.read()
+#,,,,,if,count%10,==,1:
+#,,cv2.imwrite("mydata/Hotel/%06d.jpg",%,count,,image),,,,,#,save,frame,as,JPEG,file
+#,,,,,if,cv2.waitKey(10),==,27:
+#,,break
+#,,,,,count,+=,1
+#,import,numpy,as,np
+
+#,a,=,np.mat([[1.1048200e-02,6.6958900e-04,-3.3295300e+00],[-1.5966000e-03,1.1632400e-02,-5.3951400e+00],[1.1190700e-04,1.3617400e-05,5.4276600e-01]])
+#,print(a)
+#,print(a.I)
+
 import numpy as np
-import time
-from math import *
+import matplotlib.pyplot as plt
 
-# plt.ion() #开启interactive mode 成功的关键函数
-# plt.figure(1)
-# t = [0]
-# t_now = 0
-# m = [sin(t_now)]
+a = [5,5,5,5,5,5
+,5,5,5,5,2.92314919,2.92314919
+,2.88954741,2.70291192,2.64586939,2.50580316,2.43684575,2.35479118
+,2.12569021,1.93684972,0.37396641,0.37396641,0.37343689,0.36809593
+,0.35555317,0.35426049,0.35122288,0.32860347,0.30991404,0.30338888
+,0.12355284,0.12355284,0.12312421,0.12359901,0.12310654,0.11996349
+,0.11868351,0.11271445,0.11593819,0.11332515,0.11011161,0.11011161
+,0.11021827,0.11206207,0.11217434,0.11206379,0.11135143,0.11012474
+,0.10772662,0.10684384,0.08677944,0.08677944,0.08904338,0.09081219
+,0.09138409,0.09143254,0.09058187,0.09037939,0.08842016,0.08236257
+,0.07012711,0.07012711,0.07010927,0.07006695,0.07216784,0.07066024
+,0.07064272,0.07019675,0.07286723,0.07191486,0.07067305,0.07067305
+,0.07050526,0.07031523,0.07002304,0.06931222,0.06864869,0.06683815
+,0.06637761,0.06618576,0.06473169,0.06473169,0.06341442,0.06317349
+,0.0631174,0.06249758,0.06364344,0.06367796,0.06058109,0.06092278
+,0.05322242,0.05322242,0.05322242,0.05367858,0.05348305,0.05391412
+,0.05392345,0.05392345,0.0540089,0.05345125,0.05410674,0.05410674
+,0.05414686,0.05415572,0.05413724,0.0525908,0.05406296,0.05310823
+,0.05323057,0.05319914,0.05263405,0.05274513,0.05062357,0.0498248
+,0.05099906,0.05098754,0.05078668,0.05027109,0.05033399,0.05200938
+,0.04665266,0.04665266,0.04585365,0.04790853,0.04750497,0.04780206
+,0.04817854,0.04813017,0.04825625,0.04816946,0.04992563,0.04992563
+,0.04988147,0.05011403,0.04862563,0.05271245,0.05336392,0.05165358
+,0.05139922,0.05191147,0.04883938,0.04883938,0.04884324,0.04881536
+,0.04868443,0.04870422,0.04870422,0.04856893,0.04832784,0.04603788
+,0.0392829,0.0392829,0.03912692,0.03940276,0.03944378,0.04060641
+,0.04071163,0.04061554,0.04058205,0.04048779,0.03390675,0.03390675
+,0.03397138,0.03544873,0.03544048,0.03441962,0.03450486,0.03406296
+,0.0340691,0.03387676,0.03072214,0.03072214,0.03072368,0.03074755
+,0.03076338,0.03075773,0.03059921,0.03062031,0.03061776,0.03091692
+,0.03027719,0.03027719,0.03027719,0.03029932,0.03029951,0.03030041
+,0.03033014,0.03032568,0.03021371,0.03015703,0.0305498,0.0305498
+,0.03055116,0.0305655,0.03056827,0.03034456,0.03034438,0.03024127
+,0.03017249,0.03015489,0.02670297,0.02670297,0.02670297,0.02671744
+,0.02671737,0.02672354,0.02672312,0.02659694,0.02657687,0.02649318
+,0.02690899,0.02690899,0.02691965,0.02692254,0.02690484,0.02681778
+,0.02687058,0.02690141,0.02690347,0.02691788,0.02556795,0.02556795
+,0.02569898,0.02575635,0.0257929,0.02516429,0.02488444,0.02487535
+,0.0247877,0.02479603,0.0240781,0.0240781,0.02396593,0.02402777
+,0.02398008,0.02394956,0.02389359,0.02388585,0.02402924,0.02493921
+,0.0280167,0.0280167,0.0279981,0.02794963,0.02797207,0.02797219
+,0.02790581,0.0275266,0.02748455,0.02737804,0.02395666,0.02395666
+,0.02400953,0.02403014,0.02403236,0.02403404,0.02404598,0.02403212
+,0.02333141,0.02331041,0.02347247,0.02347247,0.02347247,0.02347247
+,0.02346285,0.02341243,0.02342333,0.02339465,0.02316873,0.02318202
+,0.02317697,0.02317697,0.02317466,0.02316237,0.02302118,0.02443434
+,0.02437888,0.02446189,0.02451684,0.02461437,0.02872673,0.02872673
+,0.02868766,0.02869093,0.02714707,0.02712569,0.02702013,0.0269558
+,0.02690723,0.02687208,0.02116286,0.02116286,0.02116257,0.02117368
+,0.02116262,0.02116379,0.02116476,0.02111238,0.02111291,0.02111291
+,0.02098843,0.02098843,0.02088923,0.02091036,0.02093133,0.02093541
+,0.02088477,0.0208576,0.02085976,0.02086185,0.02048374,0.02048374
+,0.02048185,0.02048375,0.02037187,0.02045894,0.02054035,0.02056323
+,0.02041282,0.02031983,0.01993634,0.01993634,0.0199503,0.01995095
+,0.01991166,0.01991648,0.01992688,0.01983043,0.01973558,0.01980389
+,0.0205282,0.0205282,0.02043656,0.02043016,0.02043016,0.02184554
+,0.02185987,0.0218522,0.02171265,0.02173484,0.01988371,0.01988371
+,0.01989801,0.01991477,0.01982965,0.01985702,0.01989787,0.01990406
+,0.01990502,0.01992263,0.02030719,0.02030719,0.02033236,0.02033124
+,0.02033124,0.02035055,0.02035397,0.02035786,0.02033265,0.02025155
+,0.01986738,0.01986738,0.01985674,0.01980504,0.01975863,0.01972556
+,0.01968624,0.01969575,0.01961805,0.0195162,0.01761475,0.01761475
+,0.01761475,0.01760622,0.01761692,0.01761389,0.01760339,0.01760347
+,0.01760347,0.017594,0.01776849,0.01776849,0.01776849,0.01776293
+,0.01775795,0.0176964,0.01680783,0.01676631,0.01677632,0.01672214
+,0.01658051,0.01658051,0.01659453,0.01659507,0.01655462,0.0164742
+,0.01647474,0.01647474,0.01647474,0.01647474]
 
-# for i in range(2000):
-#     plt.clf() #清空画布上的所有内容
-#     t_now = i*0.1
-#     t.append(t_now)#模拟数据增量流入，保存历史数据
-#     m.append(sin(t_now))#模拟数据增量流入，保存历史数据
-#     plt.plot(t,m,'-r')
-#     plt.pause(0.01)
+b = [5,5,5,5,5,5
+,5,5,5,5,5,5
+,5,5,5,5,5,5
+,5,5,5,5,5,5
+,5,5,5,5,5,5
+,5,5,5,5,5,5
+,5,5,5,5,5,5
+,5,5,5,5,5,5
+,5,5,5,5,5,5
+,5,5,5,5,5,5
+,5,5,5,5,5,5
+,5,5,5,5,5,5
+,5,5,5,5,5,5
+,5,5,5,5,5,5
+,0.07860547,0.07859731,0.07571373,0.07513548,0.07507827,0.07742833
+,0.07917275,0.07819434,0.07809922,0.08247847,0.08213235,0.08166854
+,0.08151719,0.07854577,0.07818161,0.07784507,0.07784665,0.07784665
+,0.07652702,0.07482117,0.07413419,0.07416401,0.07403664,0.07376394
+,0.07381241,0.07462426,0.07432921,0.07426704,0.06872757,0.06556066
+,0.06330706,0.06280012,0.06250928,0.06250993,0.06061618,0.06016079
+,0.05997476,0.05991463,0.05727245,0.05722617,0.05723103,0.05654309
+,0.05606679,0.05616462,0.05640576,0.05640576,0.05634866,0.05634759
+,0.05638469,0.05648079,0.05612843,0.0556479,0.05526574,0.05512367
+,0.05507658,0.05514856,0.05500118,0.05500118,0.0544627,0.0544627
+,0.05457942,0.05453966,0.05448064,0.05448064,0.05448064,0.05448085
+,0.05428035,0.05405447,0.05516546,0.05521966,0.05498604,0.05595145
+,0.05502243,0.05447622,0.05409247,0.05353226,0.05353226,0.05090336
+,0.05081832,0.05081832,0.05081832,0.05083673,0.05083673,0.04942202
+,0.04921836,0.04841045,0.04776267,0.04818497,0.04797071,0.04826681
+,0.04798924,0.04781147,0.04781693,0.04781693,0.04743477,0.04743399
+,0.04742918,0.0471129,0.04706286,0.0466139,0.04598673,0.04598984
+,0.04600352,0.0455949,0.04539346,0.04511356,0.04526427,0.04526427
+,0.04807361,0.04807361,0.04825426,0.04825617,0.04825617,0.04825617
+,0.04825617,0.04825846,0.04699082,0.0473802,0.04725837,0.04618888
+,0.04619776,0.04602892,0.04536377,0.04533493,0.04674572,0.04674805
+,0.04674805,0.0466065,0.04657635,0.04649571,0.04598122,0.04598122
+,0.04598423,0.04688481,0.04682485,0.04682485,0.04685461,0.04963006
+,0.04963006,0.04890705,0.04880177,0.04880454,0.04876704,0.04874461
+,0.04868714,0.04864896,0.04864982,0.04864172,0.04864172,0.04864172
+,0.0485665,0.04855798,0.0483622,0.04826259,0.04811669,0.04784368
+,0.04826946,0.04819032,0.04804474,0.04804474,0.0481392,0.04814276
+,0.04792656,0.04773479,0.04632399,0.04632399,0.04592745,0.04586302
+,0.04575046,0.04560537,0.04560537,0.04555708,0.04558008,0.04508536
+,0.04523814,0.04524503,0.04515916,0.04501215,0.0448997,0.04459647
+,0.04435593,0.04428191,0.0440635,0.04359819,0.04376315,0.04419047
+,0.04447827,0.04447827,0.04447827,0.04176355,0.03983271,0.03983421
+,0.03941405,0.03899257,0.03899257,0.03942365,0.03857279,0.03855272
+,0.0385528,0.0385528,0.03854865,0.038476,0.03848717,0.03823879
+,0.03814439,0.03816483,0.03816483,0.03816483,0.03816474,0.03777363
+,0.03777363,0.03777363,0.03765539,0.03758137,0.0375158,0.03751523
+,0.03751451,0.03713914,0.03713914,0.03713636,0.03715597,0.03715597
+,0.0363203,0.03638533,0.03619377,0.03584321,0.03593216,0.0333274
+,0.0333274,0.03332767,0.03336127,0.03336127,0.03335012,0.03355578
+,0.03348596,0.03344995,0.03345025,0.03306518,0.03294005,0.03294026
+,0.03252794,0.03219288,0.03201363,0.0319462,0.03146104,0.03108646
+,0.03109456,0.0311138,0.0311138,0.03116125,0.03093172,0.03093172
+,0.03093138,0.03093138,0.03093138,0.03056158,0.03056096,0.03054888
+,0.03054888,0.03039316,0.03032323,0.03032518,0.03032499,0.02995608
+,0.02995688,0.02986043,0.02933872,0.02933872,0.02913823,0.0289796
+,0.02877774,0.02873698,0.02853082,0.02845168,0.02877264,0.02877264
+,0.02876637,0.02871953,0.02871953,0.02871953,0.02872154,0.02863388
+,0.02857607,0.02857664,0.02857987,0.02853016,0.02801132,0.02778618
+,0.02780426,0.02780636,0.02776173,0.02766554,0.0274997,0.02735176
+,0.0273614,0.02798333,0.02793332,0.02787061,0.02700162,0.02700162
+,0.02687587,0.02687587,0.02683831,0.02683831,0.02684271,0.02873661
+,0.02873769,0.02879342,0.02877767,0.02877527,0.02867617,0.02863617
+,0.02863617,0.02863852,0.02863852,0.02843516]
 
-# # -*- coding: utf-8 -*-
-# import cv2
-# import matplotlib.pyplot as plt
-# import numpy as np
-# from scipy.spatial import ConvexHull
-# ##########scipy 凸包################
-# # points = np.random.rand(30, 2)
-# points = np.array([[680.,489.],
-#  [675.32088886,501.85575219],
-#  [663.47296355,508.69615506],
-#  [650.        ,506.32050808],
-#  [641.20614758,495.84040287],
-#  [641.20614758,482.15959713],
-#  [650.        ,471.67949192],
-#  [663.47296355,469.30384494],
-#  [675.32088886,476.14424781],
-#  [680.        ,489.        ],
-#  [700.        ,455.        ],
-#  [695.32088886,467.85575219],
-#  [683.47296355,474.69615506],
-#  [670.        ,472.32050808],
-#  [661.20614758,461.84040287],
-#  [661.20614758,448.15959713],
-#  [670.        ,437.67949192],
-#  [683.47296355,435.30384494],
-#  [695.32088886,442.14424781],
-#  [700.        ,455.        ]])
-# # print(points)
-# hull = ConvexHull(points)
-# # plt.plot(points[:,0], points[:,1], 'o')
-# # hull.vertices 得到凸轮廓坐标的索引值，逆时针画
-# hull1=hull.vertices.tolist()#要闭合必须再回到起点[0]
-# hull1.append(hull1[0])
-# plt.plot(points[hull1,0], points[hull1,1], 'r--',lw=2)
-# # for i in range(len(hull1)-1):
-# #     plt.text(points[hull1[i],0], points[hull1[i],1],str(i),fontsize=20)
-# plt.show()
-# import flatten
-# from itertools import combinations 
-# def group(track_id):
-#     if len(track_id) > 1:
-#         track_id = flatten.flatten(track_id)
-#     track_id = sorted(track_id)
-#     return np.array(list(combinations(track_id, 2)))
-# merge = []
-# mycouples =group([[1],[2],[3]])
-# print(group([1]))
-# print([[mycouples[1][0]], [mycouples[1][1]]])
-# merge = merge + [mycouples[1][0], mycouples[1][1]]
-# print(merge)
-# merge = merge + [mycouples[2][0], mycouples[2][1]]
-# print(set([1,2,3]) == set([1,2,3]))
-# print(flatten.flatten([[1],[2]]))
+x = np.linspace(0,400,400)
 
-import multiprocessing as mp
-import itertools
-from functools import partial
-
-def job(z, r, item):
-    x = item
-    return x + z + r
-    
-def multicore(z):
-    x_y = list(range(10))
-    print(x_y)
-    r = 2
-    func = partial(job, z, r)
-    pool = mp.Pool()  # 无参数时，使用所有cpu核
-    # pool = mp.Pool(processes=3) # 有参数时，使用CPU核数量为3
-    res = pool.map(func, x_y)
-    return res
-
-if __name__ == '__main__':
-    res = multicore(1)
-    print(res)
-
-
-'''
-        print('-----------------------------------------------')
-        print("gap:",delta_i)
-        sum_d = np.sum(delta_i)
-        probability = delta_i / sum_d
-        if math.isinf(sum_d): # 如果gap值中有infinity
-            probability = np.array([1 if math.isnan(i) else i for i in probability])
-            sum_p = np.sum(probability)
-            probability = probability / sum_p
-        n_list = [i for i in range(n)]
-        i = np.random.choice(n_list, p = probability.ravel()) # 按照概率选择一个i
-        
-        print('---------------------------------------')
-        print('k = '+ str(k)+', i = ' + str(i))
-        start = time.clock()
-        model_w = w
-        # y_star = constraint(model_w, X_train[i], Y_train[i])
-        if np.all(model_w == 0):
-            i = 1
-            y_star = constraintFind(model_w, X_train[i], Y_train[i])
-        else:
-            y_star = constraint(model_w, X_train[i], Y_train[i])
-        print("y_star: ",y_star)
-        delta,_,_ = loss.lossGM(Y_train[i], y_star)
-        delta_i[i] = delta
-        print(delta)
-        w = (1 - lr)*w - lr*(np.array(fm.featureMap(X_train[i], y_star)) - np.array(fm.featureMap(X_train[i], Y_train[i]))).reshape(-1,1)
-        # w = ((k+1)/(k+3)) * model_w + (2/(k+3)) * w
-        
-        if (k + 1)%20 == 0:
-            for j in range(n):
-                y_star = constraint(w, X_train[j], Y_train[j])
-                delta,_,_ = loss.lossGM(Y_train[j], y_star)
-                delta_i[j] = delta
-            # w = ((k+1)/(k+3)) * model_w + (2/(k+3)) * w
-        
-        # if sum(delta_i)/n < delta0:
-        #     delta0 = sum(delta_i)/n
-        #     wfinal = w
-
-        w_final = np.hstack((w_final, w))
-        
-        end = time.clock()
-        print(w.reshape(1,-1)[0])
-        print("time:",end-start)
-'''
+plt.plot(x, a, ls="-", lw=2, label="adaptive sampling")
+plt.plot(x, b, ls="-", lw=2, label="uniform sampling")
+plt.ylim([0,0.1])
+plt.xlabel('number of iteration',fontsize=12)
+plt.ylabel('duality gap',fontsize=12)
+plt.legend(loc=0,ncol=1)
+plt.show()

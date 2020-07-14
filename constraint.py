@@ -17,9 +17,10 @@ def constraint(model_w, X_train, Y_train):
     """
     # 维护一个关系匹配度网络
     couples_features = X_train['myfeatures']
+    # print(couples_features)
     # 并更新所有行人之间的关系值（n×8）×（8×1），值越大表示越匹配
     score_network = np.dot(np.array(couples_features), model_w) 
-    
+    # print(score_network)
     # 这个时间窗口下的所有行人id
     pedestrians = X_train['trackid']
     # 对每个行人都创建一个cluster，即当前每个人都是独立的行人
